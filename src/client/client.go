@@ -15,9 +15,9 @@ type Client struct {
 	Err    error
 }
 
+//TODO Separate Each Client By Protocol
 func (e* Client) SetConnection(){
 	jsonFile, err := os.Open("connect.json")
-
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -30,19 +30,20 @@ func (e* Client) SetConnection(){
 
 	e.serverAddr = fmt.Sprintf("%v", result["serverAddress"])
 	e.protocol = fmt.Sprintf("%v", result["protocol"])
-	log.Print("Connection set")
 	log.Print(e)
 }
 
-func (e *Client) CreateThreads() {
+func (e *Client) CreateThreads(value []string) {
 	thread := handler{}
-	thread.Create(e.serverAddr,e.protocol)
+	thread.Create(e.serverAddr, e.protocol, value)
 	e.threads = append(e.threads, thread)
+	log.Print(thread)
 }
 
 func (e* Client) MakeRequest(Message string) {
 	for _, thread := range e.threads {
 		thread.MakeRequest(Message)
+		thread.ListenResponse()
 	}
 }
 
