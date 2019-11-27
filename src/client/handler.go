@@ -14,8 +14,8 @@ type handler struct {
 	err  error
 }
 
-func (e *handler) Create(serverAddr string, protocol string, value []string) {
-	e.conn, e.err = net.Dial(protocol, serverAddr)
+func (e *handler) Create(serverAddr string, value []string) {
+	e.conn, e.err = net.Dial("tcp",serverAddr)
 	e.value = value
 	if e.err != nil {
 		log.Fatalf("Fail to connect to Server")
