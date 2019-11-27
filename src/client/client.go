@@ -33,11 +33,13 @@ func (e *Client) SetConnection() {
 	log.Print(e)
 }
 
-func (e *Client) CreateThreads(value []string) {
-	thread := handler{}
-	thread.Create(e.serverAddr, e.protocol, value)
-	e.threads = append(e.threads, thread)
-	log.Print(thread)
+func (e *Client) CreateThreads(values [][]string) {
+	for _, value := range values {
+		thread := handler{}
+		thread.Create(e.serverAddr, value)
+		e.threads = append(e.threads, thread)
+		log.Print(thread)
+	}
 }
 
 func (e *Client) MakeRequest(Message string) {
