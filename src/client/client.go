@@ -1,22 +1,22 @@
 package client
 
 import (
-	"io/ioutil"
-	"fmt"
-	"os"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 )
 
 type Client struct {
-	threads []handler
+	threads    []handler
 	serverAddr string
-	protocol string
-	Err    error
+	protocol   string
+	Err        error
 }
 
 //TODO Separate Each Client By Protocol
-func (e* Client) SetConnection(){
+func (e *Client) SetConnection() {
 	jsonFile, err := os.Open("connect.json")
 	if err != nil {
 		fmt.Println(err)
@@ -40,16 +40,15 @@ func (e *Client) CreateThreads(value []string) {
 	log.Print(thread)
 }
 
-func (e* Client) MakeRequest(Message string) {
+func (e *Client) MakeRequest(Message string) {
 	for _, thread := range e.threads {
 		thread.MakeRequest(Message)
 		thread.ListenResponse()
 	}
 }
 
-func (e* Client) MakeCommunication(Messages []string) {
+func (e *Client) MakeCommunication(Messages []string) {
 	for _, Message := range Messages {
 		e.MakeRequest(Message)
 	}
 }
-
