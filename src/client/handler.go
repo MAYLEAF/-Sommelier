@@ -1,21 +1,21 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
-	"encoding/json"
 )
 
 type handler struct {
-	conn net.Conn
+	conn  net.Conn
 	value []string
-	err  error
+	err   error
 }
 
 func (e *handler) Create(serverAddr string, value []string) {
-	e.conn, e.err = net.Dial("tcp",serverAddr)
+	e.conn, e.err = net.Dial("tcp", serverAddr)
 	e.value = value
 	if e.err != nil {
 		log.Fatalf("Fail to connect to Server")
@@ -24,14 +24,14 @@ func (e *handler) Create(serverAddr string, value []string) {
 
 func (e handler) MakeRequest(Message string) {
 	var result interface{}
-	json.Unmarshal([]byte(Message),&result)
+	json.Unmarshal([]byte(Message), &result)
 	result.(interface{}).(map[string]interface{})["uid"] = e.value[0]
 	message, _ := json.Marshal(result)
 	e.conn.Write([]byte(message))
 	log.Print("Request" + string(message))
 }
 
-func (e handler) ListenResponse(){
+func (e handler) ListenResponse() {
 
 	buf := make([]byte, 0, 16384)
 	tmp := make([]byte, 256)
@@ -55,4 +55,3 @@ func (e handler) ListenResponse(){
 	fmt.Print("Message from server: " + string(buf) + "\n")
 
 }
-
