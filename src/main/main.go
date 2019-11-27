@@ -1,34 +1,37 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
-	"encoding/json"
-	"encoding/csv"
-	"io/ioutil"
-	"os"
 	"client"
+	"encoding/csv"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
 func main() {
-	documents := readJson()
-	rows := readCsv()
 	//TODO Separate Start Process
+	request := flag.String("request", "request.json", "<file_name>.json")
+	value := flag.String("value", "value.csv", "<file_name>.csv")
+	flag.Parse()
 
+	documents := readJson(*request)
+	rows := readCsv(*value)
 	var e = client.Client{}
 	e.SetConnection()
-	for _, row := range rows{
-		e.CreateThreads(row)
-	}
+	e.CreateThreads(rows)
 
-	for _, document := range documents{
+	for _, document := range documents {
 		message, _ := json.Marshal(document)
 		e.MakeRequest(string(message))
 	}
 }
 
-func readJson() map[string]interface{}{
-	jsonFile, err := os.Open("request.json")
+func readJson(file_name string) map[string]interface{} {
+	jsonFile, err := os.Open(file_name)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -40,8 +43,8 @@ func readJson() map[string]interface{}{
 	return result
 }
 
-func readCsv() [][]string{
-	file, err := os.Open("value.csv")
+func readCsv(file_name string) [][]string {
+	file, err := os.Open(file_name)
 	if err != nil {
 		fmt.Println(err)
 	}
