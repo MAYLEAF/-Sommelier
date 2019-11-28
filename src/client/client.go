@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 )
 
 type Client struct {
@@ -44,8 +45,15 @@ func (e *Client) CreateThreads(values [][]string) {
 
 func (e *Client) MakeRequest(Message string) {
 	for _, thread := range e.threads {
-		thread.MakeRequest(Message)
-		thread.ListenResponse()
+		ch := make(chan string,10)
+		time.Sleep(1 * time.Second)
+		thread.MakeRequest(Message, ch)
+		select {
+		case send := <-ch:
+			log.Print(send)
+		default:
+			log.Print("default")
+		}
 	}
 }
 

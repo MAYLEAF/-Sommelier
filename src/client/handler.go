@@ -22,16 +22,17 @@ func (e *handler) Create(serverAddr string, value []string) {
 	}
 }
 
-func (e handler) MakeRequest(Message string) {
+func (e *handler) MakeRequest(Message string, ch chan string) {
 	var result interface{}
 	json.Unmarshal([]byte(Message), &result)
 	result.(interface{}).(map[string]interface{})["uid"] = e.value[0]
 	message, _ := json.Marshal(result)
 	e.conn.Write([]byte(message))
 	log.Print("Request" + string(message))
+	ch <- e.value[0]
 }
 
-func (e handler) ListenResponse() {
+func (e *handler) ListenResponse(ch chan string) {
 
 	buf := make([]byte, 0, 16384)
 	tmp := make([]byte, 256)
