@@ -24,6 +24,13 @@ func (e *handler) Create(serverAddr string, value []string) {
 	}
 }
 
+func (e *handler) test(messages []string) {
+	for _, message := range messages {
+		ch := make(chan string, 1)
+		e.MakeRequest(message, ch)
+	}
+}
+
 func (e *handler) MakeRequest(Message string, ch chan string) {
 	e.lock.Lock()
 	defer e.lock.Unlock()

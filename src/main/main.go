@@ -30,6 +30,7 @@ func main() {
 	e.CreateThreads(rows)
 
 	var keys []string
+	var messages []string
 
 	for key, _ := range documents {
 		keys = append(keys, key)
@@ -43,13 +44,10 @@ func main() {
 
 	for _, key := range keys {
 		message, _ := json.Marshal(documents[key])
-		e.MakeRequest(string(message))
+		messages = append(messages, string(message))
 	}
+	e.MakeTest(messages)
 
-	for _, document := range documents {
-		message, _ := json.Marshal(document)
-		e.MakeRequest(string(message))
-	}
 	for _, last := range lasts {
 		message, _ := json.Marshal(last)
 		e.MakeRequest(string(message))

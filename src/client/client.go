@@ -42,10 +42,15 @@ func (e *Client) CreateThreads(values [][]string) {
 		log.Print(thread)
 	}
 }
+func (e *Client) MakeTest(messages []string) {
+	for _, thread := range e.threads {
+		thread.test(messages)
+	}
+}
 
 func (e *Client) MakeRequest(Message string) {
 	for _, thread := range e.threads {
-		ch := make(chan string,10)
+		ch := make(chan string, 10)
 		time.Sleep(1 * time.Second)
 		thread.MakeRequest(Message, ch)
 		select {
