@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 )
 
 func main() {
@@ -28,10 +29,23 @@ func main() {
 	e.SetConnection()
 	e.CreateThreads(rows)
 
+	var keys []string
+
+	for key, _ := range documents {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
 	for _, start := range starts {
 		message, _ := json.Marshal(start)
 		e.MakeRequest(string(message))
 	}
+
+	for _, key := range keys {
+		message, _ := json.Marshal(documents[key])
+		e.MakeRequest(string(message))
+	}
+
 	for _, document := range documents {
 		message, _ := json.Marshal(document)
 		e.MakeRequest(string(message))
