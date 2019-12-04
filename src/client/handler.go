@@ -6,11 +6,13 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync"
 )
 
 type handler struct {
 	conn  net.Conn
 	value []string
+	lock  sync.Mutex
 	err   error
 }
 
@@ -23,6 +25,9 @@ func (e *handler) Create(serverAddr string, value []string) {
 }
 
 func (e *handler) MakeRequest(Message string, ch chan string) {
+	e.lock.Lock()
+	defer e.lock.Unlock()
+
 	var result interface{}
 	json.Unmarshal([]byte(Message), &result)
 	result.(interface{}).(map[string]interface{})["uid"] = e.value[0]
