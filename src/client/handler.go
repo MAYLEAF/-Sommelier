@@ -25,21 +25,6 @@ func (e *handler) Create(serverAddr string, value []string) {
 	}
 }
 
-func (e *handler) test(messages []string, thread sync.WaitGroup) {
-	log.Printf("Logger: Test A Thread;  Handler=%v", e)
-	defer log.Printf("Logger: TestEnd A Thread; Handler=%v", e)
-	go e.requestMaker()
-	e.send = make(chan string, 10)
-
-	for _, message := range messages {
-		e.schedule.Add(1)
-		e.send <- message
-	}
-
-	e.schedule.Wait()
-	thread.Done()
-}
-
 func (e *handler) requestMaker() {
 	log.Printf("Logger: handler.requestMaker() handler=%v", e)
 	defer log.Printf("Logger: handler.requestMaker() handler=%v", e)
@@ -70,7 +55,7 @@ func (e *handler) MakeRequest(Message string, ch chan string) error {
 	if _, err := e.conn.Write([]byte(message)); nil != err {
 		return err
 	}
-	log.Print("Logger: MakeRequest" + string(message))
+	log.Print("Request Message:" + string(message))
 
 	ch <- e.value[0]
 	return nil
