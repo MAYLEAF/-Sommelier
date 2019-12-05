@@ -27,12 +27,14 @@ func (e *handler) Create(serverAddr string, value []string) {
 
 func (e *handler) test(messages []string, thread sync.WaitGroup) {
 	go e.requestMaker()
+	e.send = make(chan string, 10)
 
 	for _, message := range messages {
 		e.schedule.Add(1)
-		ch := make(chan string, 1)
-		e.MakeRequest(message, ch)
+		e.send <- message
 	}
+
+	e.schedule.Wait()
 	thread.Done()
 }
 
@@ -45,6 +47,7 @@ func (e *handler) requestMaker() {
 				log.Printf("failed request err: %v", err)
 			}
 			e.schedule.Done()
+			break
 		}
 	}
 }
