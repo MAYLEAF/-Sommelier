@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"sync"
-	"time"
 )
 
 type Client struct {
@@ -44,14 +43,14 @@ func (e *Client) CreateThreads(values [][]string) {
 		thread := handler{}
 		thread.Create(e.serverAddr, value)
 		e.threads = append(e.threads, thread)
-		log.Print(thread)
 		e.wg.Done()
 	}
 	e.wg.Wait()
 }
 func (e *Client) MakeTest(messages []string) {
 	log.Print("Logger: MakeTest")
-	defer log.Print("Logger: MakeTest")
+	defer log.Print("Logger: MakeTestEnd")
+
 	for _, thread := range e.threads {
 		e.wg.Add(1)
 		go e.test(messages, thread)
@@ -72,13 +71,13 @@ func (e *Client) test(messages []string, thread handler) {
 	}
 
 	thread.schedule.Wait()
+	e.wg.Done()
 }
 
 func (e *Client) MakeRequest(Message string) {
 	for _, thread := range e.threads {
 		e.wg.Add(1)
 		ch := make(chan string, 10)
-		time.Sleep(1 * time.Second)
 		thread.MakeRequest(Message, ch)
 		select {
 		case send := <-ch:
