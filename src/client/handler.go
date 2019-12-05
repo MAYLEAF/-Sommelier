@@ -12,7 +12,6 @@ import (
 type handler struct {
 	conn  net.Conn
 	value []string
-	lock  sync.Mutex
 	err   error
 }
 
@@ -44,8 +43,9 @@ func (e *handler) requestMaker() {
 }
 
 func (e *handler) MakeRequest(Message string, ch chan string) {
-	e.lock.Lock()
-	defer e.lock.Unlock()
+	lock := &sync.Mutex{}
+	lock.Lock()
+	defer lock.Unlock()
 
 	var result interface{}
 	json.Unmarshal([]byte(Message), &result)
