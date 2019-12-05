@@ -25,9 +25,21 @@ func (e *handler) Create(serverAddr string, value []string) {
 }
 
 func (e *handler) test(messages []string) {
+	go e.requestMaker()
 	for _, message := range messages {
 		ch := make(chan string, 1)
 		e.MakeRequest(message, ch)
+	}
+}
+
+func (e *handler) requestMaker() {
+	for {
+		select {
+		case msg := <-e.send:
+			if err := e.MakeRequest(message); nil != err {
+				log.Printf("failed request err: %v", err)
+			}
+		}
 	}
 }
 
