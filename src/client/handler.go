@@ -12,6 +12,7 @@ import (
 type handler struct {
 	conn  net.Conn
 	value []string
+	send  chan string
 	err   error
 }
 
@@ -36,14 +37,15 @@ func (e *handler) requestMaker() {
 	for {
 		select {
 		case msg := <-e.send:
-			if err := e.MakeRequest(message); nil != err {
+			ch := make(chan string, 2)
+			if err := e.MakeRequest(msg, ch); nil != err {
 				log.Printf("failed request err: %v", err)
 			}
 		}
 	}
 }
 
-func (e *handler) MakeRequest(Message string, ch chan string) {
+func (e *handler) MakeRequest(Message string, ch chan string) error {
 	lock := &sync.Mutex{}
 	lock.Lock()
 	defer lock.Unlock()
@@ -52,9 +54,12 @@ func (e *handler) MakeRequest(Message string, ch chan string) {
 	json.Unmarshal([]byte(Message), &result)
 	result.(interface{}).(map[string]interface{})["uid"] = e.value[0]
 	message, _ := json.Marshal(result)
-	e.conn.Write([]byte(message))
+	if _, err := e.conn.Write([]byte(message)); nil != err {
+		return err
+	}
 	log.Print("Request" + string(message))
 	ch <- e.value[0]
+	return nil
 }
 
 func (e *handler) ListenResponse(ch chan string) {
