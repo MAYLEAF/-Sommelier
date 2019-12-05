@@ -26,6 +26,8 @@ func (e *handler) Create(serverAddr string, value []string) {
 }
 
 func (e *handler) test(messages []string, thread sync.WaitGroup) {
+	log.Printf("Logger: Test A Thread;  Handler=%v", e)
+	defer log.Printf("Logger: TestEnd A Thread; Handler=%v", e)
 	go e.requestMaker()
 	e.send = make(chan string, 10)
 
@@ -39,6 +41,9 @@ func (e *handler) test(messages []string, thread sync.WaitGroup) {
 }
 
 func (e *handler) requestMaker() {
+	log.Printf("Logger: handler.requestMaker() handler=%v", e)
+	defer log.Printf("Logger: handler.requestMaker() handler=%v", e)
+
 	for {
 		select {
 		case msg := <-e.send:
@@ -53,6 +58,7 @@ func (e *handler) requestMaker() {
 }
 
 func (e *handler) MakeRequest(Message string, ch chan string) error {
+
 	lock := &sync.Mutex{}
 	lock.Lock()
 	defer lock.Unlock()
@@ -64,7 +70,8 @@ func (e *handler) MakeRequest(Message string, ch chan string) error {
 	if _, err := e.conn.Write([]byte(message)); nil != err {
 		return err
 	}
-	log.Print("Request" + string(message))
+	log.Print("Logger: MakeRequest" + string(message))
+
 	ch <- e.value[0]
 	return nil
 }

@@ -33,10 +33,12 @@ func (e *Client) SetConnection() {
 
 	e.serverAddr = fmt.Sprintf("%v", result["serverAddress"])
 	e.protocol = fmt.Sprintf("%v", result["protocol"])
-	log.Print(e)
+	log.Print("Logger: SetConnection with %v", result["serverAddress"])
+
 }
 
 func (e *Client) CreateThreads(values [][]string) {
+	log.Print("Logger: Create Threads")
 	for _, value := range values {
 		e.wg.Add(1)
 		thread := handler{}
@@ -48,6 +50,8 @@ func (e *Client) CreateThreads(values [][]string) {
 	e.wg.Wait()
 }
 func (e *Client) MakeTest(messages []string) {
+	log.Print("Logger: MakeTest")
+	defer log.Print("Logger: MakeTest")
 	for _, thread := range e.threads {
 		e.wg.Add(1)
 		go thread.test(messages, e.wg)
