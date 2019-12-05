@@ -10,10 +10,11 @@ import (
 )
 
 type handler struct {
-	conn  net.Conn
-	value []string
-	send  chan string
-	err   error
+	conn     net.Conn
+	value    []string
+	schedule sync.WaitGroup
+	send     chan string
+	err      error
 }
 
 func (e *handler) Create(serverAddr string, value []string) {
@@ -26,7 +27,9 @@ func (e *handler) Create(serverAddr string, value []string) {
 
 func (e *handler) test(messages []string, thread sync.WaitGroup) {
 	go e.requestMaker()
+
 	for _, message := range messages {
+		e.schedule.Add(1)
 		ch := make(chan string, 1)
 		e.MakeRequest(message, ch)
 	}
@@ -41,6 +44,7 @@ func (e *handler) requestMaker() {
 			if err := e.MakeRequest(msg, ch); nil != err {
 				log.Printf("failed request err: %v", err)
 			}
+			e.schedule.Done()
 		}
 	}
 }
