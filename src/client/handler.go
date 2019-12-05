@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"sync"
+	"time"
 )
 
 type handler struct {
@@ -33,9 +34,11 @@ func (e *handler) requestMaker() {
 		select {
 		case msg := <-e.send:
 			ch := make(chan string, 2)
+			time.Sleep(100 * time.Millisecond)
 			if err := e.MakeRequest(msg, ch); nil != err {
 				log.Printf("failed request err: %v", err)
 			}
+			e.ListenResponse(ch)
 			e.schedule.Done()
 			break
 		}
