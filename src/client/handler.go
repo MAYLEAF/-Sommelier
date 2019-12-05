@@ -23,12 +23,13 @@ func (e *handler) Create(serverAddr string, value []string) {
 	}
 }
 
-func (e *handler) test(messages []string) {
+func (e *handler) test(messages []string, thread sync.WaitGroup) {
 	go e.requestMaker()
 	for _, message := range messages {
 		ch := make(chan string, 1)
 		e.MakeRequest(message, ch)
 	}
+	thread.Done()
 }
 
 func (e *handler) requestMaker() {
