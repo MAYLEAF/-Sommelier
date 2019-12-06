@@ -1,3 +1,4 @@
+//Package Client implements a controller for TCP communication.
 package client
 
 import (
@@ -17,7 +18,6 @@ type Client struct {
 	Err        error
 }
 
-//TODO Separate Each Client By Protocol
 func (e *Client) SetConnection() {
 	jsonFile, err := os.Open("connect.json")
 	if err != nil {
