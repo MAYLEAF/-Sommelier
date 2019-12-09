@@ -29,6 +29,7 @@ func (e *Handler) Create(serverAddr string, value []string) {
 func (e *Handler) RequestMaker() {
 	log.Printf("Logger: handler.requestMaker() handler=%v", e)
 	defer log.Printf("Logger: handler.requestMaker() handler=%v", e)
+	threadReader := reader{}
 
 	for {
 		select {
@@ -38,7 +39,7 @@ func (e *Handler) RequestMaker() {
 			if err := e.MakeRequest(msg, ch); nil != err {
 				log.Printf("failed request err: %v", err)
 			}
-			e.ListenResponse(ch)
+			threadReader.read(e)
 			e.Schedule.Done()
 			break
 		}
@@ -62,29 +63,4 @@ func (e *Handler) MakeRequest(Message string, ch chan string) error {
 
 	ch <- e.value[0]
 	return nil
-}
-
-func (e *Handler) ListenResponse(ch chan string) {
-
-	buf := make([]byte, 0, 16384)
-	tmp := make([]byte, 256)
-
-	for {
-		n, err := e.conn.Read(tmp)
-		if err != nil {
-			if err != io.EOF {
-				fmt.Println("read error:", err)
-				log.Print(err)
-			}
-			break
-		}
-		if n != 256 {
-			buf = append(buf, tmp[:n]...)
-			break
-		}
-		buf = append(buf, tmp[:n]...)
-	}
-
-	fmt.Print("Message from server: " + string(buf) + "\n")
-
 }
