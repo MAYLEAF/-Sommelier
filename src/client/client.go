@@ -8,10 +8,11 @@ import (
 	"log"
 	"os"
 	"sync"
+	"thread"
 )
 
 type Client struct {
-	threads    []handler
+	threads    []thread.Handler
 	serverAddr string
 	wg         sync.WaitGroup
 	protocol   string
@@ -40,7 +41,7 @@ func (e *Client) CreateThreads(values [][]string) {
 	log.Print("Logger: Create Threads")
 	for _, value := range values {
 		e.wg.Add(1)
-		thread := handler{}
+		thread := thread.Handler{}
 		thread.Create(e.serverAddr, value)
 		e.threads = append(e.threads, thread)
 		e.wg.Done()
@@ -58,19 +59,19 @@ func (e *Client) MakeTest(messages []string) {
 	e.wg.Wait()
 }
 
-func (e *Client) test(messages []string, thread handler) {
+func (e *Client) test(messages []string, thread thread.Handler) {
 	log.Printf("Logger: Test A Thread;  Handler=%v", thread)
 	defer log.Printf("Logger: TestEnd A Thread; Handler=%v\n\n", thread)
 
-	go thread.requestMaker()
-	thread.send = make(chan string, 10)
+	go thread.RequestMaker()
+	thread.Send = make(chan string, 10)
 
 	for _, message := range messages {
-		thread.schedule.Add(1)
-		thread.send <- message
+		thread.Schedule.Add(1)
+		thread.Send <- message
 	}
 
-	thread.schedule.Wait()
+	thread.Schedule.Wait()
 	e.wg.Done()
 }
 
