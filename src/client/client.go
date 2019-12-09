@@ -77,22 +77,6 @@ func (e *Client) test(messages []string, thread thread.Handler) {
 
 func (e *Client) MakeRequest(Message string) {
 	for _, thread := range e.threads {
-		e.wg.Add(1)
-		ch := make(chan string, 10)
-		thread.MakeRequest(Message, ch)
-		select {
-		case send := <-ch:
-			log.Print(send)
-			e.wg.Done()
-		default:
-			log.Print("default")
-		}
-	}
-	e.wg.Wait()
-}
-
-func (e *Client) MakeCommunication(Messages []string) {
-	for _, Message := range Messages {
-		e.MakeRequest(Message)
+		thread.MakeRequest(Message)
 	}
 }
