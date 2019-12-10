@@ -1,7 +1,6 @@
 package thread
 
 import (
-	"encoding/json"
 	"log"
 	"net"
 	"sync"
@@ -40,4 +39,9 @@ func (e *Handler) RequestMaker() {
 			break
 		}
 	}
+}
+
+func (e *Handler) Write(message string) {
+	threadWriter := writer{}
+	threadWriter.write(e, message)
 }
