@@ -5,6 +5,7 @@ package json
 
 import (
 	"encoding/json"
+	"log"
 )
 
 type Json struct {
