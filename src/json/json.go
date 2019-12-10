@@ -16,4 +16,8 @@ func (e *Json) Create(msg string) error {
 	return err
 }
 
+func (e *Json) Update(key string, value interface{}) {
+	e.json[key] = value
+}
+
 //TODO update,create, delete, read
