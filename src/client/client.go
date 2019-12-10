@@ -77,6 +77,6 @@ func (e *Client) test(messages []string, thread thread.Handler) {
 
 func (e *Client) MakeRequest(Message string) {
 	for _, thread := range e.threads {
-		thread.MakeRequest(Message)
+		thread.Write(Message)
 	}
 }
