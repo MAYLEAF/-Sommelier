@@ -16,6 +16,14 @@ func (e *Json) Create(msg string) error {
 	return err
 }
 
+func (e *Json) Read() (string, err) {
+	if msg, err := json.Marshal(e.json); err != nil {
+		log.Printf("Fail to read json err:%v \n\n", err)
+		return err
+	}
+	return string(msg)
+}
+
 func (e *Json) Update(key string, value interface{}) {
 	e.json[key] = value
 }
