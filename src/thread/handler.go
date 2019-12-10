@@ -25,7 +25,7 @@ func (e *Handler) Create(serverAddr string, value []string) {
 
 func (e *Handler) RequestMaker() {
 	log.Printf("Logger: handler.requestMaker() handler=%v", e)
-	defer log.Printf("Logger: handler.requestMaker() handler=%v", e)
+	defer log.Printf("Logger: handler.requestMaker() handler=%v\n\n", e)
 	threadReader := reader{}
 	threadWriter := writer{}
 
