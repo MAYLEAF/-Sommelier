@@ -34,7 +34,7 @@ func (e *Handler) RequestMaker() {
 		case msg := <-e.Send:
 			time.Sleep(150 * time.Millisecond)
 			threadWriter.write(e, msg)
-			threadReader.read(e)
+			threadReader.read(e, msg)
 			e.Schedule.Done()
 			break
 		}
