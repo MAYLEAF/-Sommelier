@@ -15,8 +15,9 @@ type Json struct {
 func (e *Json) Create(msg string) error {
 	if err := json.Unmarshal([]byte(msg), e.json); err != nil {
 		log.Printf("Fail to create json err: %v \n\n", err)
+		return err
 	}
-	return err
+	return nil
 }
 
 func (e *Json) Read() ([]byte, error) {
