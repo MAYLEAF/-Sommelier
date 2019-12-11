@@ -14,11 +14,11 @@ type Json struct {
 
 func (e *Json) Create(msg string) error {
 	e.json = make(map[string]interface{})
-	if err := json.Unmarshal([]byte(msg), &e.json); err != nil {
+	err := json.Unmarshal([]byte(msg), &e.json)
+	if err != nil {
 		log.Printf("Fail to create json err: %v \n\n", err)
-		return err
 	}
-	return nil
+	return err
 }
 func (e *Json) Read() ([]byte, error) {
 	msg, err := json.Marshal(e.json)
