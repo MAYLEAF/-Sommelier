@@ -35,7 +35,7 @@ func (e *Json) Have(key string, value interface{}) bool {
 	case e.json[key] == value:
 		return true
 	case e.json[key] != value:
-		log.Printf("Json key %v does not have value %v", key, value)
+		return false
 	default:
 		log.Print("Unknown error")
 	}
