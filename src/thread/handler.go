@@ -32,7 +32,7 @@ func (e *Handler) RequestMaker() {
 	for {
 		select {
 		case msg := <-e.Send:
-			time.Sleep(150 * time.Millisecond)
+			time.Sleep(1000 * time.Millisecond)
 			threadWriter.write(e, msg)
 			threadReader.read(e, msg)
 			e.Schedule.Done()

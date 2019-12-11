@@ -9,6 +9,7 @@ import (
 	"os"
 	"sync"
 	"thread"
+	"time"
 )
 
 type Client struct {
@@ -77,6 +78,7 @@ func (e *Client) test(messages []string, thread thread.Handler) {
 
 func (e *Client) MakeRequest(Message string) {
 	for _, thread := range e.threads {
+		time.Sleep(1000 * time.Millisecond)
 		thread.Write(Message)
 	}
 }
