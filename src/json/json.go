@@ -21,11 +21,11 @@ func (e *Json) Create(msg string) error {
 	return nil
 }
 func (e *Json) Read() ([]byte, error) {
-	if msg, err := json.Marshal(e.json); err != nil {
+	msg, err := json.Marshal(e.json)
+	if err != nil {
 		log.Printf("Fail to read json err:%v \n\n", err)
-		return err
 	}
-	return msg
+	return msg, err
 }
 
 func (e *Json) Have(key string, value interface{}) bool {
