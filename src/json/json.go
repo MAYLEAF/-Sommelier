@@ -42,6 +42,20 @@ func (e *Json) Have(key string, value interface{}) bool {
 	return false
 }
 
+func (e *Json) Has(key string, value interface{}) bool {
+	switch {
+	case e.json[key] == nil:
+		log.Printf("Json key %v is empty", key)
+	case e.json[key] == value:
+		return true
+	case e.json[key] != value:
+		log.Printf("Json key $v have not value %v", key, value)
+	default:
+		log.Print("Unknown error")
+	}
+	return false
+}
+
 func (e *Json) Update(key string, value interface{}) {
 	e.json[key] = value
 }
