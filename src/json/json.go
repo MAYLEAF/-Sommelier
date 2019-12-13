@@ -6,6 +6,7 @@ package json
 import (
 	"encoding/json"
 	"log"
+	"strings"
 )
 
 type Json struct {
@@ -14,12 +15,16 @@ type Json struct {
 
 func (e *Json) Create(msg string) error {
 	e.json = make(map[string]interface{})
-	err := json.Unmarshal([]byte(msg), &e.json)
+	dec := json.NewDecoder(strings.NewReader(msg))
+	err := dec.Decode(&e.json)
+
 	if err != nil {
-		log.Printf("Fail to create json err: %v \n\n", err)
+		log.Fatal(err)
 	}
+
 	return err
 }
+
 func (e *Json) Read() ([]byte, error) {
 	msg, err := json.Marshal(e.json)
 	if err != nil {
