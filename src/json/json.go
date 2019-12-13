@@ -33,6 +33,10 @@ func (e *Json) Read() ([]byte, error) {
 	return msg, err
 }
 
+func (e *Json) SetJson(json map[string]interface{}) {
+	e.json = json
+}
+
 func (e *Json) Have(key string, value interface{}) bool {
 	switch {
 	case e.json[key] == nil:
