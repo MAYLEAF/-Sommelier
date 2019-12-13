@@ -68,3 +68,11 @@ func (e *Json) Has(key string, value interface{}) bool {
 func (e *Json) Update(key string, value interface{}) {
 	e.json[key] = value
 }
+
+func (e *Json) Select(key string) []byte {
+	msg, err := json.Marshal(e.json[key])
+	if err != nil {
+		log.Printf("Fail to read json err: %v \n", err)
+	}
+	return msg
+}
