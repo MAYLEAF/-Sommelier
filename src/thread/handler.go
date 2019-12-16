@@ -4,7 +4,6 @@ import (
 	"log"
 	"net"
 	"sync"
-	"time"
 )
 
 type Handler struct {
@@ -23,22 +22,12 @@ func (e *Handler) Create(serverAddr string, value []string) {
 	}
 }
 
-func (e *Handler) RequestMaker() {
-	log.Printf("Logger: handler.requestMaker() handler=%v", e)
-	defer log.Printf("Logger: handler.requestMaker() handler=%v\n\n", e)
-	threadReader := reader{}
-	threadWriter := writer{}
-
-	for {
-		select {
-		case msg := <-e.Send:
-			time.Sleep(1000 * time.Millisecond)
-			threadWriter.write(e, msg)
-			threadReader.read(e, msg)
-			e.Schedule.Done()
-			break
-		}
-	}
+func (e *Handler) RequestMaker(actions map[string]interface{}) {
+	log.Printf("Logger: requestMaker START handler=%v", e)
+	defer log.Printf("Logger: requestMaker END handler=%v\n\n", e)
+	threadContext := context{}
+	threadContext.create(actions)
+	threadContext.react(e)
 }
 
 func (e *Handler) Write(message string) {

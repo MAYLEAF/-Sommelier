@@ -3,7 +3,6 @@ package thread
 import (
 	"fmt"
 	"io"
-	"json"
 	"log"
 )
 
@@ -11,10 +10,7 @@ type reader struct {
 	thread Handler
 }
 
-func (e *reader) read(thread *Handler, msg string) {
-	if !e.hasResponse(msg) {
-		return
-	}
+func (e *reader) read(thread *Handler) string {
 
 	buf := make([]byte, 0, 16384)
 	tmp := make([]byte, 256)
@@ -35,15 +31,7 @@ func (e *reader) read(thread *Handler, msg string) {
 		buf = append(buf, tmp[:n]...)
 	}
 
-	fmt.Print("Message from server: " + string(buf) + "\n")
+	fmt.Print("Message from server: " + string(buf) + "\n\n")
+	return string(buf)
 
-}
-
-func (e *reader) hasResponse(req string) bool {
-	msg := json.Json{}
-	msg.Create(req)
-	if msg.Have("_pcode", "C_SAVE_GAME_DATA") {
-		return false
-	}
-	return true
 }

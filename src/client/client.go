@@ -41,39 +41,35 @@ func (e *Client) SetConnection() {
 func (e *Client) CreateThreads(values [][]string) {
 	log.Print("Logger: Create Threads")
 	for _, value := range values {
-		e.wg.Add(1)
 		thread := thread.Handler{}
 		thread.Create(e.serverAddr, value)
 		e.threads = append(e.threads, thread)
-		e.wg.Done()
 	}
-	e.wg.Wait()
 }
-func (e *Client) MakeTest(messages []string) {
+
+func (e *Client) MakeTest(actions map[string]interface{}) {
 	log.Print("Logger: MakeTest")
 	defer log.Print("Logger: MakeTestEnd")
 
 	for _, thread := range e.threads {
 		e.wg.Add(1)
-		go e.test(messages, thread)
+		go e.test(actions, thread)
 	}
+
 	e.wg.Wait()
 }
 
-func (e *Client) test(messages []string, thread thread.Handler) {
+func (e *Client) test(actions map[string]interface{}, thread thread.Handler) {
 	log.Printf("Logger: Test A Thread;  Handler=%v", thread)
 	defer log.Printf("Logger: TestEnd A Thread; Handler=%v\n\n", thread)
 
-	go thread.RequestMaker()
+	go thread.RequestMaker(actions)
 	thread.Send = make(chan string, 10)
-
-	for _, message := range messages {
-		thread.Schedule.Add(1)
-		thread.Send <- message
-	}
-
+	thread.Schedule.Add(1)
 	thread.Schedule.Wait()
+	fmt.Printf("Logger: thread schedule done thread: %v", thread.Schedule)
 	e.wg.Done()
+	log.Print("Logger: thread schedule done client: %v", e.wg)
 }
 
 func (e *Client) MakeRequest(Message string) {
