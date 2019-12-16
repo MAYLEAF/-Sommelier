@@ -41,13 +41,10 @@ func (e *Client) SetConnection() {
 func (e *Client) CreateThreads(values [][]string) {
 	log.Print("Logger: Create Threads")
 	for _, value := range values {
-		e.wg.Add(1)
 		thread := thread.Handler{}
 		thread.Create(e.serverAddr, value)
 		e.threads = append(e.threads, thread)
-		e.wg.Done()
 	}
-	e.wg.Wait()
 }
 func (e *Client) MakeTest(messages []string) {
 	log.Print("Logger: MakeTest")
