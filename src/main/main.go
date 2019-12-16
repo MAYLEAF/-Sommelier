@@ -9,49 +9,29 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"sort"
 )
 
 func main() {
 	//TODO Separate Start Process
 	first := flag.String("start", "start.json", "<file_name>.json")
 	request := flag.String("request", "request.json", "<file_name>.json")
-	finish := flag.String("finish", "finish.json", "<file_name>.json")
 	value := flag.String("value", "value.csv", "<file_name>.csv")
 	flag.Parse()
 
 	documents := readJson(*request)
 	starts := readJson(*first)
-	lasts := readJson(*finish)
 	rows := readCsv(*value)
 
 	var e = client.Client{}
 	e.SetConnection()
 	e.CreateThreads(rows)
 
-	var keys []string
-	var messages []string
-
-	for key, _ := range documents {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-
 	for _, start := range starts {
 		message, _ := json.Marshal(start)
 		e.MakeRequest(string(message))
 	}
 
-	for _, key := range keys {
-		message, _ := json.Marshal(documents[key])
-		messages = append(messages, string(message))
-	}
-	e.MakeTest(messages)
-
-	for _, last := range lasts {
-		message, _ := json.Marshal(last)
-		e.MakeRequest(string(message))
-	}
+	e.MakeTest(documents)
 
 }
 
