@@ -10,7 +10,7 @@ type reader struct {
 	thread Handler
 }
 
-func (e *reader) read(thread *Handler) {
+func (e *reader) read(thread *Handler) string {
 
 	buf := make([]byte, 0, 16384)
 	tmp := make([]byte, 256)
@@ -31,6 +31,7 @@ func (e *reader) read(thread *Handler) {
 		buf = append(buf, tmp[:n]...)
 	}
 
-	fmt.Print("Message from server: " + string(buf) + "\n")
+	fmt.Print("Message from server: " + string(buf) + "\n\n")
+	return string(buf)
 
 }
