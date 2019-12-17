@@ -6,6 +6,7 @@ package json
 import (
 	"encoding/json"
 	"log"
+	"regexp"
 	"strings"
 )
 
@@ -63,6 +64,22 @@ func (e *Json) Has(key string, value interface{}) bool {
 		log.Print("Unknown error")
 	}
 	return false
+}
+
+func (e *Json) Contains(key string, value string) bool {
+	if e.json[key] == nil {
+		log.Printf("Json key %v is empty", key)
+		return false
+	}
+	re := regexp.MustCompile(`(.*)` + value + `(.*)`)
+	msg, err := json.Marshal(e.json[key])
+	if err != nil {
+		log.Printf("Fail to read json err: %v \n\n", err)
+	}
+	if re.Find(msg) == nil {
+		return false
+	}
+	return true
 }
 
 func (e *Json) Update(key string, value interface{}) {
