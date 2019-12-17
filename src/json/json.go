@@ -5,6 +5,7 @@ package json
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"regexp"
 	"strings"
@@ -26,12 +27,17 @@ func (e *Json) Create(msg string) error {
 	return err
 }
 
-func (e *Json) Read() ([]byte, error) {
+func (e *Json) Read() []byte {
 	msg, err := json.Marshal(e.json)
 	if err != nil {
-		log.Printf("Fail to read json err:%v \n\n", err)
+		fmt.Printf("Fail to read json err:%v \n\n", err)
+		return nil
 	}
-	return msg, err
+	return msg
+}
+
+func (e *Json) Json() map[string]interface{} {
+	return e.json
 }
 
 func (e *Json) SetJson(json map[string]interface{}) {
@@ -86,10 +92,17 @@ func (e *Json) Update(key string, value interface{}) {
 	e.json[key] = value
 }
 
-func (e *Json) Select(key string) []byte {
+func (e *Json) Select(key string) *Json {
 	msg, err := json.Marshal(e.json[key])
 	if err != nil {
 		log.Printf("Fail to read json err: %v \n", err)
 	}
-	return msg
+	dec := json.NewDecoder(strings.NewReader(string(msg)))
+	newJson := Json{}
+	err = dec.Decode(&newJson.json)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &newJson
 }

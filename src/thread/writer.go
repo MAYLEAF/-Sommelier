@@ -26,7 +26,7 @@ func (e *writer) write(thread *Handler, message string) error {
 	msg := json.Json{}
 	msg.Create(message)
 	msg.Update("uid", thread.value[0])
-	content, _ := msg.Read()
+	content := msg.Read()
 
 	if _, err := thread.conn.Write(content); nil != err {
 		log.Printf("failed to write err: %v", err)
