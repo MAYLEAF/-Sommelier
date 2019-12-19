@@ -1,9 +1,7 @@
 package thread
 
 import (
-	"fmt"
 	"json"
-	"time"
 )
 
 type context struct {
@@ -22,12 +20,9 @@ func (e *context) react(thread *Handler) {
 
 	msg.SetJson(e.actions)
 	//TODO get refeat number
-	//msg.:w
-	fmt.Print("asdasdfasdf")
-	//number.set(refeatnumber)
+	threadwriter.write(thread, string(msg.Select("C_LOGIN_REQ").Read()))
 
 	for {
-		time.Sleep(1000 * time.Millisecond)
 		response := threadreader.read(thread)
 		res := json.Json{}
 		res.Create(response)

@@ -1,7 +1,7 @@
 package thread
 
 import (
-	"log"
+	"logger"
 	"net"
 	"sync"
 )
@@ -15,16 +15,15 @@ type Handler struct {
 }
 
 func (e *Handler) Create(serverAddr string, value []string) {
+	logger := logger.Logger()
 	e.conn, e.err = net.Dial("tcp", serverAddr)
 	e.value = value
 	if e.err != nil {
-		log.Fatalf("Fail to connect to Server")
+		logger.Error("Fail to connect to Server")
 	}
 }
 
 func (e *Handler) RequestMaker(actions map[string]interface{}) {
-	log.Printf("Logger: requestMaker START handler=%v", e)
-	defer log.Printf("Logger: requestMaker END handler=%v\n\n", e)
 	threadContext := context{}
 	threadContext.create(actions)
 	threadContext.react(e)

@@ -13,23 +13,16 @@ import (
 
 func main() {
 	//TODO Separate Start Process
-	first := flag.String("start", "start.json", "<file_name>.json")
 	request := flag.String("request", "request.json", "<file_name>.json")
 	value := flag.String("value", "value.csv", "<file_name>.csv")
 	flag.Parse()
 
 	documents := readJson(*request)
-	starts := readJson(*first)
 	rows := readCsv(*value)
 
 	var e = client.Client{}
 	e.SetConnection()
 	e.CreateThreads(rows)
-
-	for _, start := range starts {
-		message, _ := json.Marshal(start)
-		e.MakeRequest(string(message))
-	}
 
 	e.MakeTest(documents)
 

@@ -5,8 +5,7 @@ package json
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
+	"logger"
 	"regexp"
 	"strings"
 )
@@ -16,21 +15,23 @@ type Json struct {
 }
 
 func (e *Json) Create(msg string) error {
+	logger := logger.Logger()
 	e.json = make(map[string]interface{})
 	dec := json.NewDecoder(strings.NewReader(msg))
 	err := dec.Decode(&e.json)
 
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("Json Create Error: %v", err)
 	}
 
 	return err
 }
 
 func (e *Json) Read() []byte {
+	logger := logger.Logger()
 	msg, err := json.Marshal(e.json)
 	if err != nil {
-		fmt.Printf("Fail to read json err:%v \n\n", err)
+		logger.Error("Fail to read json err:%v \n\n", err)
 		return nil
 	}
 	return msg
@@ -44,43 +45,31 @@ func (e *Json) SetJson(json map[string]interface{}) {
 	e.json = json
 }
 
-func (e *Json) Have(key string, value interface{}) bool {
+func (e *Json) Has(key string, value interface{}) bool {
+	logger := logger.Logger()
 	switch {
 	case e.json[key] == nil:
-		log.Printf("Json key %v is empty", key)
+		return false
 	case e.json[key] == value:
 		return true
 	case e.json[key] != value:
 		return false
 	default:
-		log.Print("Unknown error")
-	}
-	return false
-}
-
-func (e *Json) Has(key string, value interface{}) bool {
-	switch {
-	case e.json[key] == nil:
-		log.Printf("Json key %v is empty", key)
-	case e.json[key] == value:
-		return true
-	case e.json[key] != value:
-		log.Printf("Json key $v have not value %v", key, value)
-	default:
-		log.Print("Unknown error")
+		logger.Info("Json key %v have not value %v", key, value)
 	}
 	return false
 }
 
 func (e *Json) Contains(key string, value string) bool {
+	logger := logger.Logger()
 	if e.json[key] == nil {
-		log.Printf("Json key %v is empty", key)
+		logger.Info("Json key %v is empty", key)
 		return false
 	}
 	re := regexp.MustCompile(`(.*)` + value + `(.*)`)
 	msg, err := json.Marshal(e.json[key])
 	if err != nil {
-		log.Printf("Fail to read json err: %v \n\n", err)
+		logger.Info("Fail to read json err: %v \n\n", err)
 	}
 	if re.Find(msg) == nil {
 		return false
@@ -93,16 +82,17 @@ func (e *Json) Update(key string, value interface{}) {
 }
 
 func (e *Json) Select(key string) *Json {
+	logger := logger.Logger()
 	msg, err := json.Marshal(e.json[key])
 	if err != nil {
-		log.Printf("Fail to read json err: %v \n", err)
+		logger.Info("Fail to read json err: %v \n", err)
 	}
 	dec := json.NewDecoder(strings.NewReader(string(msg)))
 	newJson := Json{}
 	err = dec.Decode(&newJson.json)
 
 	if err != nil {
-		log.Fatal(err)
+		logger.Info("Json Select Error: %v", err)
 	}
 	return &newJson
 }
