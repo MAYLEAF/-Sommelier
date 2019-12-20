@@ -44,7 +44,9 @@ func (e *Client) CreateThreads(values [][]string) {
 	logger.Info("Create Threads")
 	defer logger.Info("Create ThreadsEND")
 	wg := &sync.WaitGroup{}
+	thread.Usercount = 0
 	for _, value := range values {
+		thread.Usercount++
 		wg.Add(1)
 		go func(value []string) {
 			thread := thread.Handler{}

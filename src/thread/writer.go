@@ -1,8 +1,10 @@
 package thread
 
 import (
+	"io"
 	"json"
 	"logger"
+	"os"
 	"sync"
 )
 
@@ -19,12 +21,14 @@ func (e *writer) write(thread *Handler, message string) error {
 	msg.Create(message)
 	msg.Update("uid", thread.value[0])
 	content := msg.Read()
+	_ = io.MultiWriter(thread.conn, os.Stdout)
+	msg.SetEncoder(thread.conn)
 
-	if _, err := thread.conn.Write(content); nil != err {
+	if err := msg.Encode(msg.Json()); nil != err {
 		logger.Info("failed to write err: %v", err)
 		return err
 	}
-	logger.Info("Request Message:" + string(content))
+	defer logger.Info("Request Message:" + string(content))
 
 	return nil
 }

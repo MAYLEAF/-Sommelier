@@ -10,6 +10,7 @@ type Handler struct {
 	conn     net.Conn
 	value    []string
 	Schedule sync.WaitGroup
+	lock     sync.Mutex
 	Send     chan string
 	err      error
 }

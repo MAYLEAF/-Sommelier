@@ -5,13 +5,15 @@ package json
 
 import (
 	"encoding/json"
+	"io"
 	"logger"
 	"regexp"
 	"strings"
 )
 
 type Json struct {
-	json map[string]interface{}
+	json    map[string]interface{}
+	encoder json.Encoder
 }
 
 func (e *Json) Create(msg string) error {
@@ -24,6 +26,15 @@ func (e *Json) Create(msg string) error {
 		logger.Error("Json Create Error: %v", err)
 	}
 
+	return err
+}
+
+func (e *Json) SetEncoder(w io.Writer) {
+	e.encoder = *json.NewEncoder(w)
+}
+
+func (e *Json) Encode(v interface{}) error {
+	err := e.encoder.Encode(v)
 	return err
 }
 
@@ -55,7 +66,7 @@ func (e *Json) Has(key string, value interface{}) bool {
 	case e.json[key] != value:
 		return false
 	default:
-		logger.Info("Json key %v have not value %v", key, value)
+		logger.Error("Json key %v have not value %v", key, value)
 	}
 	return false
 }
@@ -63,7 +74,6 @@ func (e *Json) Has(key string, value interface{}) bool {
 func (e *Json) Contains(key string, value string) bool {
 	logger := logger.Logger()
 	if e.json[key] == nil {
-		logger.Info("Json key %v is empty", key)
 		return false
 	}
 	re := regexp.MustCompile(`(.*)` + value + `(.*)`)
