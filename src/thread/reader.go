@@ -36,12 +36,11 @@ func (e *reader) read(thread *Handler) string {
 		}
 	*/
 	d := json.NewDecoder(thread.conn)
-
 	msg := make(map[string]interface{})
 	_ = d.Decode(&msg)
 	buf, _ := json.Marshal(msg)
 
-	logger.Info("Message from server: " + string(buf) + "\n")
+	logger.Info("Message from server - User=" + thread.value[0] + " " + string(buf) + "\n")
 	return string(buf)
 
 }

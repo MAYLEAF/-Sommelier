@@ -20,6 +20,7 @@ func (e *writer) write(thread *Handler, message string) error {
 	msg := json.Json{}
 	msg.Create(message)
 	msg.Update("uid", thread.value[0])
+
 	content := msg.Read()
 	_ = io.MultiWriter(thread.conn, os.Stdout)
 	msg.SetEncoder(thread.conn)

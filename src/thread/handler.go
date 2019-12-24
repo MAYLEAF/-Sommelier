@@ -28,6 +28,7 @@ func (e *Handler) RequestMaker(actions map[string]interface{}) {
 	threadContext := context{}
 	threadContext.create(actions)
 	threadContext.react(e)
+	e.conn.Close()
 }
 
 func (e *Handler) Write(message string) {
