@@ -26,7 +26,7 @@ func (e *Handler) Create(serverAddr string, value []string) {
 
 func (e *Handler) RequestMaker(actions map[string]interface{}) {
 	threadContext := context{}
-	threadContext.create(actions)
+	Actions = actions
 	threadContext.react(e)
 	e.conn.Close()
 }

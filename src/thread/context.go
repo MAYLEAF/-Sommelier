@@ -13,6 +13,7 @@ func (e *context) create(actions map[string]interface{}) {
 	e.actions = actions
 }
 
+var Actions map[string]interface{}
 var Usercount int
 
 func (e *context) react(thread *Handler) {
@@ -21,11 +22,12 @@ func (e *context) react(thread *Handler) {
 	logger := logger.Logger()
 
 	msg := json.Json{}
+	game_room = game_room{}
 	ping_count := 5
 	turn_seconds := 15
 	finish_throw := false
 
-	msg.SetJson(e.actions)
+	msg.SetJson(Actions)
 	//TODO get refeat number
 	threadwriter.write(thread, string(msg.Select("C_LOGIN_REQ").Read()))
 
