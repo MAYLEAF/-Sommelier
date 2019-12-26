@@ -22,10 +22,11 @@ func (e *context) react(thread *Handler) {
 	logger := logger.Logger()
 
 	msg := json.Json{}
-	game_room = game_room{}
 	ping_count := 5
 	turn_seconds := 15
 	finish_throw := false
+	is_host := false
+	is_host_turn := false
 
 	msg.SetJson(Actions)
 	//TODO get refeat number
@@ -45,18 +46,58 @@ func (e *context) react(thread *Handler) {
 
 		} else if res.Has("_pcode", "S_GAME_START") && res.Has("hostUid", thread.value[0]) {
 			threadwriter.write(thread, string(msg.Select("C_GAME_DATA").Read()))
-			turn_seconds = 15
-			ping_count--
+			is_host = true
 
 		} else if res.Has("_pcode", "C_GAME_DATA") && !res.Has("uid", thread.value[0]) && ping_count > 0 {
 			threadwriter.write(thread, string(msg.Select("C_GAME_DATA").Read()))
+
+			if is_host && is_host_turn {
+				turn_seconds = 15
+				ping_count--
+				continue
+			}
+			if !is_host && !is_host_turn {
+				turn_seconds = 15
+				ping_count--
+				continue
+			}
+
+			/*
+				if is_host {
+					is_host_turn = false
+					turn_seconds = 15
+					ping_count--
+					continue
+				}
+				is_host_turn = true
+				turn_seconds = 15
+				ping_count--
+
+			*/
+		} else if res.Has("_pcode", "C_GAME_DATA") && res.Has("uid", thread.value[0]) && ping_count > 0 {
+			if is_host {
+				is_host_turn = false
+				turn_seconds = 15
+				ping_count--
+				continue
+			}
+			is_host_turn = true
 			turn_seconds = 15
 			ping_count--
 
 		} else if res.Has("_pcode", "S_PING") && ping_count > 0 && turn_seconds <= 0 {
-			threadwriter.write(thread, string(msg.Select("C_GAME_DATA").Read()))
-			turn_seconds = 15
-			ping_count--
+			if is_host_turn && is_host {
+				threadwriter.write(thread, string(msg.Select("C_GAME_DATA").Read()))
+				is_host_turn = false
+				turn_seconds = 15
+				ping_count--
+			}
+			if !is_host_turn && !is_host {
+				threadwriter.write(thread, string(msg.Select("C_GAME_DATA").Read()))
+				is_host_turn = true
+				turn_seconds = 15
+				ping_count--
+			}
 
 		} else if res.Has("_pcode", "C_GAME_DATA") && !res.Has("uid", thread.value[0]) && ping_count <= 0 {
 			threadwriter.write(thread, string(msg.Select("C_FINISH_GAME").Read()))
