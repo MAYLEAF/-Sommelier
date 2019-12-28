@@ -56,19 +56,11 @@ func (e *Json) SetJson(json map[string]interface{}) {
 	e.json = json
 }
 
-func (e *Json) Has(key string, value interface{}) bool {
-	logger := logger.Logger()
-	switch {
-	case e.json[key] == nil:
-		return false
-	case e.json[key] == value:
-		return true
-	case e.json[key] != value:
-		return false
-	default:
-		logger.Error("Json key %v have not value %v", key, value)
+func (e *Json) Load(key string) interface{} {
+	if value, ok := e.json[key]; ok {
+		return value
 	}
-	return false
+	return nil
 }
 
 func (e *Json) Contains(key string, value string) bool {
