@@ -30,6 +30,14 @@ func (e *Json) Create(msg string) error {
 	return err
 }
 
+func Decode(r io.Reader, v interface{}) {
+	dec := json.NewDecoder(r)
+	msg := make(map[string]interface{})
+	if err := dec.Decode(&v); err != nil {
+		logger.Error("%v", err)
+	}
+}
+
 func (e *Json) SetEncoder(w io.Writer) {
 	e.encoder = *json.NewEncoder(w)
 }
