@@ -11,13 +11,14 @@ import (
 	"strings"
 )
 
+var logger = logger.Logger()
+
 type Json struct {
 	json    map[string]interface{}
 	encoder json.Encoder
 }
 
 func (e *Json) Create(msg string) error {
-	logger := logger.Logger()
 	e.json = make(map[string]interface{})
 	dec := json.NewDecoder(strings.NewReader(msg))
 	err := dec.Decode(&e.json)
