@@ -21,7 +21,6 @@ type Client struct {
 }
 
 func (e *Client) SetConnection() {
-	logger := logger.Logger()
 	jsonFile, err := os.Open("connect.json")
 	if err != nil {
 		fmt.Println(err)
@@ -40,7 +39,6 @@ func (e *Client) SetConnection() {
 }
 
 func (e *Client) CreateThreads(values [][]string) {
-	logger := logger.Logger()
 	logger.Info("Create Threads")
 	defer logger.Info("Create ThreadsEND")
 	wg := &sync.WaitGroup{}
@@ -75,7 +73,6 @@ func (e *Client) MakeTest(actions map[string]interface{}) {
 }
 
 func (e *Client) test(actions map[string]interface{}, thread thread.Handler) {
-	logger := logger.Logger()
 	logger.Info("Test A Thread;  Handler=%v", thread)
 	defer logger.Info("TestEnd A Thread; Handler=%v\n\n", thread)
 

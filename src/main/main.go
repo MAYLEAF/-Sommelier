@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"logger"
 	"os"
 )
 
@@ -16,6 +17,9 @@ func main() {
 	request := flag.String("request", "request.json", "<file_name>.json")
 	value := flag.String("value", "value.csv", "<file_name>.csv")
 	flag.Parse()
+
+	logger := logger.Logger()
+	defer logger.Close()
 
 	documents := readJson(*request)
 	rows := readCsv(*value)

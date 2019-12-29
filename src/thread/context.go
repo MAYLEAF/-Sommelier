@@ -32,7 +32,6 @@ func (e *context) Initialize() {
 func (e *context) react(thread *Handler) {
 	threadwriter := writer{}
 	threadreader := reader{}
-	logger := logger.Logger()
 
 	//TODO get refeat number
 	threadwriter.write(thread, string(e.msg.Select("C_LOGIN_REQ").Read()))

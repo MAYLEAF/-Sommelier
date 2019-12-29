@@ -11,15 +11,12 @@ import (
 	"strings"
 )
 
-var logger = logger.Logger()
-
 type Json struct {
 	json map[string]interface{}
 }
 
 func Decode(r io.Reader, v interface{}) {
 	dec := json.NewDecoder(r)
-	msg := make(map[string]interface{})
 	if err := dec.Decode(&v); err != nil {
 		logger.Error("%v", err)
 	}
@@ -29,8 +26,9 @@ func Encode(w io.Writer, v interface{}) error {
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(v); err != nil {
 		logger.Error("%v", err)
+		return err
 	}
-	return err
+	return nil
 }
 
 func Read(v interface{}) []byte {
@@ -58,7 +56,6 @@ func (e *Json) Load(key string) interface{} {
 }
 
 func (e *Json) Contains(key string, value string) bool {
-	logger := logger.Logger()
 	if e.json[key] == nil {
 		return false
 	}
@@ -73,7 +70,6 @@ func (e *Json) Contains(key string, value string) bool {
 	return true
 }
 func (e *Json) Select(key string) *Json {
-	logger := logger.Logger()
 	msg, err := json.Marshal(e.json[key])
 	if err != nil {
 		logger.Info("Fail to read json err: %v \n", err)

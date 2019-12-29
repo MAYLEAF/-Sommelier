@@ -34,10 +34,10 @@ func (e *logger) Close() {
 	e.fpLog.Close()
 }
 
-func (e *logger) Info(format string, v ...interface{}) {
+func Info(format string, v ...interface{}) {
 	log.Printf(format, v)
 }
 
-func (e *logger) Error(format string, v ...interface{}) {
+func Error(format string, v ...interface{}) {
 	log.Fatalf(format, v)
 }

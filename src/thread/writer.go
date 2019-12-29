@@ -15,7 +15,6 @@ type writer struct {
 func (e *writer) write(thread *Handler, message string) error {
 	e.lock.Lock()
 	defer e.lock.Unlock()
-	logger := logger.Logger()
 
 	msg := json.Json{}
 	msg.Create(message)
