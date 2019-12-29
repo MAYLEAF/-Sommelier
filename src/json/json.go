@@ -26,12 +26,11 @@ func Decode(r io.Reader, v interface{}) {
 	}
 }
 
-func (e *Json) SetEncoder(w io.Writer) {
-	e.encoder = *json.NewEncoder(w)
-}
-
-func (e *Json) Encode(v interface{}) error {
-	err := e.encoder.Encode(v)
+func Encode(w io.Writer, v interface{}) error {
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(v); err != nil {
+		logger.Error("%v", err)
+	}
 	return err
 }
 
