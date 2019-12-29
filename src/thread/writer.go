@@ -1,10 +1,8 @@
 package thread
 
 import (
-	"io"
 	"json"
 	"logger"
-	"os"
 	"sync"
 )
 
