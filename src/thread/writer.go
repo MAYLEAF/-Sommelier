@@ -16,19 +16,13 @@ func (e *writer) write(thread *Handler, message string) error {
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	msg := json.Json{}
-	msg.Create(message)
-	msg.Update("uid", thread.value[0])
+	msg := make(map[string]interface{})
+	strReader := strings.NewReader(message)
+	json.Decode(strReader, msg)
 
-	content := msg.Read()
-	_ = io.MultiWriter(thread.conn, os.Stdout)
-	msg.SetEncoder(thread.conn)
+	msg["uid"] = thread.value[0]
 
-	if err := msg.Encode(msg.Json()); nil != err {
-		logger.Info("failed to write err: %v", err)
-		return err
-	}
+	json.Encode(thread.conn, msg)
 	defer logger.Info("Request Message:" + string(content))
-
 	return nil
 }
