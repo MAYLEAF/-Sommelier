@@ -47,9 +47,8 @@ func (e *Json) Encode(v interface{}) error {
 	return err
 }
 
-func (e *Json) Read() []byte {
-	logger := logger.Logger()
-	msg, err := json.Marshal(e.json)
+func Read(v interface{}) []byte {
+	msg, err := json.Marshal(v)
 	if err != nil {
 		logger.Error("Fail to read json err:%v \n\n", err)
 		return nil
