@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+var logger = logger.Logger()
+
 type Handler struct {
 	conn     net.Conn
 	value    []string
@@ -16,7 +18,6 @@ type Handler struct {
 }
 
 func (e *Handler) Create(serverAddr string, value []string) {
-	logger := logger.Logger()
 	e.conn, e.err = net.Dial("tcp", serverAddr)
 	e.value = value
 	if e.err != nil {
@@ -27,6 +28,7 @@ func (e *Handler) Create(serverAddr string, value []string) {
 func (e *Handler) RequestMaker(actions map[string]interface{}) {
 	threadContext := context{}
 	Actions = actions
+	threadContext.Initialize()
 	threadContext.react(e)
 	e.conn.Close()
 }
