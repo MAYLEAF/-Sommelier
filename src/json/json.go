@@ -18,18 +18,6 @@ type Json struct {
 	encoder json.Encoder
 }
 
-func (e *Json) Create(msg string) error {
-	e.json = make(map[string]interface{})
-	dec := json.NewDecoder(strings.NewReader(msg))
-	err := dec.Decode(&e.json)
-
-	if err != nil {
-		logger.Error("Json Create Error: %v", err)
-	}
-
-	return err
-}
-
 func Decode(r io.Reader, v interface{}) {
 	dec := json.NewDecoder(r)
 	msg := make(map[string]interface{})
