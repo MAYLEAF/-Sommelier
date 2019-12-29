@@ -14,8 +14,7 @@ import (
 var logger = logger.Logger()
 
 type Json struct {
-	json    map[string]interface{}
-	encoder json.Encoder
+	json map[string]interface{}
 }
 
 func Decode(r io.Reader, v interface{}) {
@@ -73,11 +72,6 @@ func (e *Json) Contains(key string, value string) bool {
 	}
 	return true
 }
-
-func (e *Json) Update(key string, value interface{}) {
-	e.json[key] = value
-}
-
 func (e *Json) Select(key string) *Json {
 	logger := logger.Logger()
 	msg, err := json.Marshal(e.json[key])
