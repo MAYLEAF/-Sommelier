@@ -9,7 +9,6 @@ import (
 	"os"
 	"sync"
 	"thread"
-	"time"
 )
 
 type Client struct {
@@ -58,8 +57,6 @@ func (e *Client) CreateThreads(values [][]string) {
 }
 
 func (e *Client) MakeTest(actions map[string]interface{}) {
-
-	logger := logger.Logger()
 	logger.Info("MakeTest", e.wg)
 	defer logger.Info("MakeTestEnd")
 
@@ -81,11 +78,4 @@ func (e *Client) test(actions map[string]interface{}, thread thread.Handler) {
 	thread.Schedule.Add(1)
 	thread.Schedule.Wait()
 	e.wg.Done()
-}
-
-func (e *Client) MakeRequest(Message string) {
-	for _, thread := range e.threads {
-		time.Sleep(1000 * time.Millisecond)
-		thread.Write(Message)
-	}
 }
