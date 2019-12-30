@@ -15,7 +15,7 @@ type Json struct {
 	json map[string]interface{}
 }
 
-func Decode(r io.Reader, v interface{}) error {
+func Decode(r io.Reader, v map[string]interface{}) error {
 	dec := json.NewDecoder(r)
 	if err := dec.Decode(&v); err != nil {
 		logger.Info("Json Decode error occur Err: %v, Interface: %v", err, v)
