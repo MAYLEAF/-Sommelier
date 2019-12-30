@@ -15,17 +15,19 @@ type Json struct {
 	json map[string]interface{}
 }
 
-func Decode(r io.Reader, v interface{}) {
+func Decode(r io.Reader, v interface{}) error {
 	dec := json.NewDecoder(r)
 	if err := dec.Decode(&v); err != nil {
-		logger.Error("%v", err)
+		logger.Info("Json Decode error occur Err: %v, Interface: %v", err, v)
+		return err
 	}
+	return nil
 }
 
 func Encode(w io.Writer, v interface{}) error {
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(v); err != nil {
-		logger.Error("%v", err)
+		logger.Info("Json Encode error occur Err: %v, Interface: %v", err, v)
 		return err
 	}
 	return nil
