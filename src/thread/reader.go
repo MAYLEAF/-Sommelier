@@ -16,7 +16,9 @@ func (e *reader) read(thread *Handler) []byte {
 	defer e.lock.Unlock()
 
 	msg := make(map[string]interface{})
-	json.Decode(thread.conn, msg)
+	if err := json.Decode(thread.conn, msg); err != nil {
+		logger.Info("%v", err)
+	}
 	buf := json.Read(msg)
 
 	logger.Info("Message from server - User=" + thread.value[0] + " " + string(buf) + "\n")

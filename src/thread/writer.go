@@ -18,8 +18,10 @@ func (e *writer) write(thread *Handler, message []byte) error {
 
 	msg := make(map[string]interface{})
 	byteReader := bytes.NewReader(message)
-	json.Decode(byteReader, msg)
-
+	if err := json.Decode(bytesReader, msg); err != nil {
+		logger.Info("Thread Decode error occur. Err: %v, Conn: %v", err, thread.conn)
+		return err
+	}
 	msg["uid"] = thread.value[0]
 
 	if err := json.Encode(thread.conn, msg); err != nil {
