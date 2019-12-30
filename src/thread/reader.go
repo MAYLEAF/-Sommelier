@@ -2,6 +2,7 @@ package thread
 
 import (
 	"json"
+	"logger"
 	"sync"
 )
 
@@ -10,7 +11,7 @@ type reader struct {
 	lock   sync.Mutex
 }
 
-func (e *reader) read(thread *Handler) string {
+func (e *reader) read(thread *Handler) []byte {
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
@@ -19,5 +20,5 @@ func (e *reader) read(thread *Handler) string {
 	buf := json.Read(msg)
 
 	logger.Info("Message from server - User=" + thread.value[0] + " " + string(buf) + "\n")
-	return string(buf)
+	return buf
 }

@@ -6,8 +6,6 @@ import (
 	"sync"
 )
 
-var logger = logger.Logger()
-
 type Handler struct {
 	conn     net.Conn
 	value    []string
@@ -33,7 +31,7 @@ func (e *Handler) RequestMaker(actions map[string]interface{}) {
 	e.conn.Close()
 }
 
-func (e *Handler) Write(message string) {
+func (e *Handler) Write(message []byte) {
 	threadWriter := writer{}
 	threadWriter.write(e, message)
 }

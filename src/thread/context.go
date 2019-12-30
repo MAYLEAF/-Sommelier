@@ -1,6 +1,7 @@
 package thread
 
 import (
+	"bytes"
 	"json"
 	"logger"
 )
@@ -34,33 +35,38 @@ func (e *context) react(thread *Handler) {
 	threadreader := reader{}
 
 	//TODO get refeat number
-	threadwriter.write(thread, string(e.msg.Select("C_LOGIN_REQ").Read()))
+	threadwriter.write(thread, json.Read(e.msg.Load("C_LOGIN_REQ")))
 
 	for {
 		response := threadreader.read(thread)
-		res := json.Json{}
-		res.Create(response)
-		if res.Has("_pcode", "S_LOGIN_RES") {
-			threadwriter.write(thread, string(e.msg.Select("C_READY_TO_START").Read()))
+		res := make(map[string]interface{})
+		jsonObj := json.Json{}
+		bytesReader := bytes.NewReader(response)
+		if err := json.Decode(bytesReader, res); err != nil {
+			jsonObj.SetJson(res)
+		}
+
+		if jsonObj.Load("_pcode") == "S_LOGIN_RES" {
+			threadwriter.write(thread, json.Read(e.msg.Load("C_READY_TO_START")))
 			continue
 		}
-		if res.Contains("other_uid", "AI_") {
-			threadwriter.write(thread, string(e.msg.Select("C_FINISH_GAME").Read()))
+		if jsonObj.Contains("other_uid", "AI_") {
+			threadwriter.write(thread, json.Read(e.msg.Load("C_FINISH_GAME")))
 			continue
 		}
-		if res.Has("_pcode", "S_GAME_CREATED") && !res.Contains("other_uid", "AI_") {
-			threadwriter.write(thread, string(e.msg.Select("C_LOADING_COMPLETE").Read()))
+		if jsonObj.Load("_pcode") == "S_GAME_CREATED" && !jsonObj.Contains("other_uid", "AI_") {
+			threadwriter.write(thread, json.Read(e.msg.Load("C_LOADING_COMPLETE")))
 			continue
 		}
-		if res.Has("_pcode", "S_GAME_START") {
-			if res.Has("hostUid", thread.value[0]) {
+		if jsonObj.Load("_pcode") == "S_GAME_START" {
+			if jsonObj.Load("hostUid") == thread.value[0] {
 				e.is_host = true
-				threadwriter.write(thread, string(e.msg.Select("C_GAME_DATA").Read()))
+				threadwriter.write(thread, json.Read(e.msg.Load("C_GAME_DATA")))
 			}
 			continue
 		}
-		if res.Has("_pcode", "C_GAME_DATA") && !res.Has("uid", thread.value[0]) && e.ping_count > 0 {
-			err := threadwriter.write(thread, string(e.msg.Select("C_GAME_DATA").Read()))
+		if jsonObj.Load("_pcode") == "C_GAME_DATA" && jsonObj.Load("uid") != thread.value[0] && e.ping_count > 0 {
+			err := threadwriter.write(thread, json.Read(e.msg.Load("C_GAME_DATA")))
 			if err != nil {
 				logger.Info("User count %d", Usercount)
 				thread.Schedule.Done()
@@ -70,39 +76,39 @@ func (e *context) react(thread *Handler) {
 			e.turn_seconds = 15
 			e.ping_count--
 
-		} else if res.Has("_pcode", "C_GAME_DATA") && res.Has("uid", thread.value[0]) && e.ping_count > 0 {
+		} else if jsonObj.Load("_pcode") == "C_GAME_DATA" && jsonObj.Load("uid") == thread.value[0] && e.ping_count > 0 {
 			e.is_request_fired = false
 			e.is_my_turn = false
 
-		} else if res.Has("_pcode", "S_PING") && e.ping_count > 0 && !e.is_request_fired && e.turn_seconds <= 0 {
+		} else if jsonObj.Load("_pcode") == "S_PING" && e.ping_count > 0 && !e.is_request_fired && e.turn_seconds <= 0 {
 			if e.is_my_turn && e.is_host {
-				threadwriter.write(thread, string(e.msg.Select("C_GAME_DATA").Read()))
+				threadwriter.write(thread, json.Read(e.msg.Load("C_GAME_DATA")))
 				e.turn_seconds = 15
 			}
 			if !e.is_my_turn && !e.is_host {
-				threadwriter.write(thread, string(e.msg.Select("C_GAME_DATA").Read()))
+				threadwriter.write(thread, json.Read(e.msg.Load("C_GAME_DATA")))
 				e.turn_seconds = 15
 			}
 			e.is_request_fired = true
 
-		} else if res.Has("_pcode", "C_GAME_DATA") && !res.Has("uid", thread.value[0]) && !e.is_finish_throw && e.ping_count <= 0 {
+		} else if jsonObj.Load("_pcode") == "C_GAME_DATA" && jsonObj.Load("uid") != thread.value[0] && !e.is_finish_throw && e.ping_count <= 0 {
 			e.is_finish_throw = true
 			e.turn_seconds = 15
-			threadwriter.write(thread, string(e.msg.Select("C_FINISH_GAME").Read()))
+			threadwriter.write(thread, json.Read(e.msg.Load("C_FINISH_GAME")))
 
-		} else if res.Has("_pcode", "S_GAME_RESULT") {
-			threadwriter.write(thread, string(e.msg.Select("C_BACK_TO_LOBBY").Read()))
+		} else if jsonObj.Load("_pcode") == "S_GAME_RESULT" {
+			threadwriter.write(thread, json.Read(e.msg.Load("C_BACK_TO_LOBBY")))
 			Usercount--
 			logger.Info("User count %d", Usercount)
 			thread.Schedule.Done()
 			return
-		} else if res.Has("_pcode", "S_MATCHING_FAIL") {
-			threadwriter.write(thread, string(e.msg.Select("C_BACK_TO_LOBBY").Read()))
+		} else if jsonObj.Load("_pcode") == "S_MATCHING_FAIL" {
+			threadwriter.write(thread, json.Read(e.msg.Load("C_BACK_TO_LOBBY")))
 			Usercount--
 			logger.Info("User count %d", Usercount)
 			thread.Schedule.Done()
 			return
-		} else if res.Has("_pcode", "S_PING") {
+		} else if jsonObj.Load("_pcode") == "S_PING" {
 			e.turn_seconds--
 			logger.Info("User "+thread.value[0]+"-turn: %d seconds, ping_count: %v left", e.turn_seconds, e.ping_count)
 		} else if e.turn_seconds < 0 {

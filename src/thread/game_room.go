@@ -44,7 +44,6 @@ func (e *game_room) SendGameData() {
 		writer.write(e.host_user, e.Action("C_GAME_DATA"))
 		return
 	}
-
 	writer.write(e.guest_user, e.Action("C_GAME_DATA"))
 	e.ping_count--
 	return
@@ -55,6 +54,6 @@ func (e *game_room) Update() {
 	e.is_host_turn = !e.is_host_turn
 }
 
-func (e *game_room) Action(action string) string {
-	return string(e.actions.Select(action).Read())
+func (e *game_room) Action(action string) []byte {
+	return json.Read(e.actions.Select(action))
 }
