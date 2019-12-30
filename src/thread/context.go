@@ -43,8 +43,9 @@ func (e *context) react(thread *Handler) {
 		jsonObj := json.Json{}
 		bytesReader := bytes.NewReader(response)
 		if err := json.Decode(bytesReader, res); err != nil {
-			jsonObj.SetJson(res)
+			logger.Info("%v", err)
 		}
+		jsonObj.SetJson(res)
 
 		if jsonObj.Load("_pcode") == "S_LOGIN_RES" {
 			threadwriter.write(thread, json.Read(e.msg.Load("C_READY_TO_START")))
