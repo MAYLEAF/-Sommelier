@@ -7,7 +7,7 @@ import (
 )
 
 type Handler struct {
-	conn     net.Conn
+	conn     *net.TCPConn
 	value    []string
 	Schedule sync.WaitGroup
 	lock     sync.Mutex
@@ -16,17 +16,18 @@ type Handler struct {
 }
 
 func (e *Handler) Create(serverAddr string, value []string) {
-	e.conn, e.err = net.Dial("tcp", serverAddr)
+	server, _ := net.ResolveTCPAddr("tcp", serverAddr)
+	e.conn, e.err = net.DialTCP("tcp", nil, server)
 	e.value = value
 	if e.err != nil {
-		logger.Error("Fail to connect to Server")
+		logger.Error("Fail to connect to Server err : %v", e.err)
 	}
 }
 
 func (e *Handler) RequestMaker(actions map[string]interface{}) {
 	threadContext := context{}
 	Actions = actions
-	threadContext.Initialize()
+	threadContext.Initialize(e)
 	threadContext.react(e)
 	e.conn.Close()
 }
