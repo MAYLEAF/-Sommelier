@@ -1,6 +1,7 @@
 package thread
 
 import (
+	_ "bufio"
 	"json"
 	"logger"
 	"sync"
@@ -12,12 +13,12 @@ type reader struct {
 }
 
 func (e *reader) read(thread *Handler) []byte {
-	e.lock.Lock()
-	defer e.lock.Unlock()
+	thread.lock.Lock()
+	defer thread.lock.Unlock()
 
 	msg := make(map[string]interface{})
 	if err := json.Decode(thread.conn, msg); err != nil {
-		logger.Info("%v", err)
+		logger.Info("Thread Reader error occur Err: %v User:%v", err, thread.value[0])
 	}
 	buf := json.Read(msg)
 
