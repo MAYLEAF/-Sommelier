@@ -35,9 +35,9 @@ func (e *logger) Close() {
 }
 
 func Info(format string, v ...interface{}) {
-	log.Printf(format, v)
+	log.Printf(format, v...)
 }
 
 func Error(format string, v ...interface{}) {
-	log.Fatalf(format, v)
+	log.Fatalf(format, v...)
 }
