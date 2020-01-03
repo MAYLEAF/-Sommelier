@@ -81,6 +81,7 @@ func (e *context) react(thread *Handler) {
 					thread.Schedule.Done()
 					return
 				}
+				e.is_finish_throw = true
 			}
 			if jsonObj.Load("uid") == thread.value[0] {
 				continue
@@ -106,8 +107,9 @@ func (e *context) react(thread *Handler) {
 			return
 		}
 
-		if jsonObj.Load("_pcode") == "S_DISCONNECT_RES" {
+		if jsonObj.Load("_pcode") == "S_DISCONNECT_RES" && !e.is_finish_throw {
 			threadwriter.write(thread, json.Read(e.msg.Load("C_FINISH_GAME")))
+			e.is_finish_throw = true
 			continue
 		}
 
