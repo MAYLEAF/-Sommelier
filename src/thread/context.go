@@ -14,12 +14,13 @@ type context struct {
 	is_request_fired bool
 	is_host          bool
 	is_my_turn       bool
+	thread           *Handler
 }
 
 var Actions map[string]interface{}
 var Usercount int
 
-func (e *context) Initialize() {
+func (e *context) Initialize(thread *Handler) {
 	e.msg = json.Json{}
 	e.msg.SetJson(Actions)
 	e.ping_count = 5
@@ -28,6 +29,7 @@ func (e *context) Initialize() {
 	e.is_request_fired = false
 	e.is_host = false
 	e.is_my_turn = false
+	e.thread = thread
 }
 
 func (e *context) react(thread *Handler) {
@@ -46,6 +48,7 @@ func (e *context) react(thread *Handler) {
 			logger.Info("%v", err)
 		}
 		jsonObj.SetJson(res)
+		var pcode string
 
 		if jsonObj.Load("_pcode") == "S_LOGIN_RES" {
 			threadwriter.write(thread, json.Read(e.msg.Load("C_READY_TO_START")))
@@ -59,6 +62,7 @@ func (e *context) react(thread *Handler) {
 			threadwriter.write(thread, json.Read(e.msg.Load("C_LOADING_COMPLETE")))
 			continue
 		}
+
 		if jsonObj.Load("_pcode") == "S_GAME_START" {
 			if jsonObj.Load("hostUid") == thread.value[0] {
 				e.is_host = true
@@ -66,55 +70,61 @@ func (e *context) react(thread *Handler) {
 			}
 			continue
 		}
-		if jsonObj.Load("_pcode") == "C_GAME_DATA" && jsonObj.Load("uid") != thread.value[0] && e.ping_count > 0 {
-			err := threadwriter.write(thread, json.Read(e.msg.Load("C_GAME_DATA")))
-			if err != nil {
+		if jsonObj.Load("_pcode") == "C_GAME_DATA" {
+			pcode = "C_GAME_DATA"
+			if jsonObj.Load("uid") == thread.value[0] {
+				e.ping_count--
+			}
+			if jsonObj.Load("uid") == thread.value[0] && e.ping_count <= 0 {
+				if err := threadwriter.write(thread, json.Read(e.msg.Load("C_FINISH_GAME"))); err != nil {
+					logger.Info("User count %d", Usercount)
+					thread.Schedule.Done()
+					return
+				}
+			}
+			if jsonObj.Load("uid") == thread.value[0] {
+				continue
+			}
+			if err := threadwriter.write(thread, json.Read(e.msg.Load(pcode))); err != nil {
 				logger.Info("User count %d", Usercount)
 				thread.Schedule.Done()
 				return
 			}
-			e.is_my_turn = true
-			e.turn_seconds = 15
-			e.ping_count--
+			continue
+		}
 
-		} else if jsonObj.Load("_pcode") == "C_GAME_DATA" && jsonObj.Load("uid") == thread.value[0] && e.ping_count > 0 {
-			e.is_request_fired = false
-			e.is_my_turn = false
-
-		} else if jsonObj.Load("_pcode") == "S_PING" && e.ping_count > 0 && !e.is_request_fired && e.turn_seconds <= 0 {
-			if e.is_my_turn && e.is_host {
-				threadwriter.write(thread, json.Read(e.msg.Load("C_GAME_DATA")))
-				e.turn_seconds = 15
+		if jsonObj.Load("_pcode") == "S_GAME_RESULT" {
+			if err := threadwriter.write(thread, json.Read(e.msg.Load("C_BACK_TO_LOBBY"))); err != nil {
+				logger.Info("User count %d", Usercount)
+				thread.Schedule.Done()
+				return
 			}
-			if !e.is_my_turn && !e.is_host {
-				threadwriter.write(thread, json.Read(e.msg.Load("C_GAME_DATA")))
-				e.turn_seconds = 15
-			}
-			e.is_request_fired = true
 
-		} else if jsonObj.Load("_pcode") == "C_GAME_DATA" && jsonObj.Load("uid") != thread.value[0] && !e.is_finish_throw && e.ping_count <= 0 {
-			e.is_finish_throw = true
-			e.turn_seconds = 15
+			Usercount--
+			logger.Info("User count %d", Usercount)
+			thread.Schedule.Done()
+			return
+		}
+
+		if jsonObj.Load("_pcode") == "S_DISCONNECT_RES" {
 			threadwriter.write(thread, json.Read(e.msg.Load("C_FINISH_GAME")))
+			continue
+		}
 
-		} else if jsonObj.Load("_pcode") == "S_GAME_RESULT" {
-			threadwriter.write(thread, json.Read(e.msg.Load("C_BACK_TO_LOBBY")))
+		if jsonObj.Load("_pcode") == "S_MATCHING_FAIL" {
+			if err := threadwriter.write(thread, json.Read(e.msg.Load("C_BACK_TO_LOBBY"))); err != nil {
+				logger.Info("User count %d", Usercount)
+				thread.Schedule.Done()
+				return
+			}
 			Usercount--
 			logger.Info("User count %d", Usercount)
 			thread.Schedule.Done()
 			return
-		} else if jsonObj.Load("_pcode") == "S_MATCHING_FAIL" {
-			threadwriter.write(thread, json.Read(e.msg.Load("C_BACK_TO_LOBBY")))
-			Usercount--
-			logger.Info("User count %d", Usercount)
-			thread.Schedule.Done()
-			return
-		} else if jsonObj.Load("_pcode") == "S_PING" {
-			e.turn_seconds--
-			logger.Info("User "+thread.value[0]+"-turn: %d seconds, ping_count: %v left", e.turn_seconds, e.ping_count)
-		} else if e.turn_seconds < 0 {
-			e.turn_seconds = 15
-		} else {
+		}
+
+		if jsonObj.Load("_pcode") == "S_PING" {
+			logger.Info("User - %v ping_count: %v, isHost: %v", e.thread.value[0], e.ping_count, e.is_host)
 			continue
 		}
 	}
@@ -124,4 +134,13 @@ func (e *context) TurnChange() {
 	e.is_my_turn = !e.is_my_turn
 	e.turn_seconds = 15
 	e.ping_count--
+}
+
+func (e *context) Send(pcode string) error {
+	writer := writer{}
+	if err := writer.write(e.thread, json.Read(e.msg.Load(pcode))); err != nil {
+		logger.Info("Thread context send fail User - %v, pcode: %v", e.thread.value[0], pcode)
+		return err
+	}
+	return nil
 }
