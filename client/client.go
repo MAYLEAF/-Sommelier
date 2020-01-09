@@ -4,11 +4,11 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/MAYLEAF/Sommelier/logger"
+	"github.com/MAYLEAF/Sommelier/thread"
 	"io/ioutil"
-	"logger"
 	"os"
 	"sync"
-	"thread"
 )
 
 type Client struct {

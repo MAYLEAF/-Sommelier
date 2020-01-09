@@ -3,8 +3,8 @@ package thread
 import (
 	"bufio"
 	"bytes"
-	"json"
-	"logger"
+	"github.com/MAYLEAF/Sommelier/json"
+	"github.com/MAYLEAF/Sommelier/logger"
 	"sync"
 )
 
@@ -33,7 +33,6 @@ func (e *writer) write(thread *Handler, message []byte) error {
 		logger.Info("Thread Writer Write error occur. Err: %v, Conn: %v", err, thread.value[0])
 		return err
 	}
-
 	if err := bufWriter.Flush(); err != nil {
 		logger.Info("Thread Writer Flush error occur. Err: %v, Conn: %v", err, thread.value[0])
 		return err

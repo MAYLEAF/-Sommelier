@@ -1,7 +1,7 @@
 package thread
 
 import (
-	"logger"
+	"github.com/MAYLEAF/Sommelier/logger"
 	"net"
 	"sync"
 )
@@ -18,6 +18,9 @@ type Handler struct {
 func (e *Handler) Create(serverAddr string, value []string) {
 	server, _ := net.ResolveTCPAddr("tcp", serverAddr)
 	e.conn, e.err = net.DialTCP("tcp", nil, server)
+	if err := e.conn.SetNoDelay(false); err != nil {
+		logger.Error("Fail to set no delay to Server err : %v", err)
+	}
 	e.value = value
 	if e.err != nil {
 		logger.Error("Fail to connect to Server err : %v", e.err)

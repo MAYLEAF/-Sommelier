@@ -1,9 +1,9 @@
 package thread
 
 import (
-	_ "bufio"
-	"json"
-	"logger"
+	"bufio"
+	"github.com/MAYLEAF/Sommelier/json"
+	"github.com/MAYLEAF/Sommelier/logger"
 	"sync"
 )
 
@@ -13,11 +13,19 @@ type reader struct {
 }
 
 func (e *reader) read(thread *Handler) []byte {
-	thread.lock.Lock()
-	defer thread.lock.Unlock()
+	e.lock.Lock()
+	defer e.lock.Unlock()
+
+	/*
+		scanner := bufio.NewScanner(thread.conn)
+		for scanner.Scan() {
+			logger.Info("Thread Reader Scanner: %v",scanner.Bytes())
+		}
+	*/
 
 	msg := make(map[string]interface{})
-	if err := json.Decode(thread.conn, msg); err != nil {
+	bufReader := bufio.NewReader(thread.conn)
+	if err := json.Decode(bufReader, msg); err != nil {
 		logger.Info("Thread Reader error occur Err: %v User:%v", err, thread.value[0])
 	}
 	buf := json.Read(msg)

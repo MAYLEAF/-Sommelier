@@ -2,8 +2,8 @@ package thread
 
 import (
 	"bytes"
-	"json"
-	"logger"
+	"github.com/MAYLEAF/Sommelier/json"
+	"github.com/MAYLEAF/Sommelier/logger"
 )
 
 type context struct {

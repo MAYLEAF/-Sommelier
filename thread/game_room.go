@@ -1,7 +1,7 @@
 package thread
 
 import (
-	"json"
+	"github.com/MAYLEAF/Sommelier/json"
 )
 
 type game_room struct {

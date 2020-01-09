@@ -2,13 +2,13 @@ package main
 
 import (
 	"bufio"
-	"client"
 	"encoding/csv"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/MAYLEAF/Sommelier/client"
+	"github.com/MAYLEAF/Sommelier/logger"
 	"io/ioutil"
-	"logger"
 	"os"
 )
 

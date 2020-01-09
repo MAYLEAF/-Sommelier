@@ -5,8 +5,8 @@ package json
 
 import (
 	"encoding/json"
+	"github.com/MAYLEAF/Sommelier/logger"
 	"io"
-	"logger"
 	"regexp"
 	"strings"
 )
