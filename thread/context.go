@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/MAYLEAF/Sommelier/json"
 	"github.com/MAYLEAF/Sommelier/logger"
+	"reflect"
 )
 
 type context struct {
@@ -36,100 +37,94 @@ func (e *context) react(thread *Handler) {
 	threadwriter := writer{}
 	threadreader := reader{}
 
-	//TODO get refeat number
+	chjson := make(chan []byte)
 	threadwriter.write(thread, json.Read(e.msg.Load("C_LOGIN_REQ")))
 
-	for {
-		response := threadreader.read(thread)
-		res := make(map[string]interface{})
-		jsonObj := json.Json{}
-		bytesReader := bytes.NewReader(response)
-		if err := json.Decode(bytesReader, res); err != nil {
-			logger.Info("%v", err)
-		}
-		jsonObj.SetJson(res)
-		var pcode string
-
-		if jsonObj.Load("_pcode") == "S_LOGIN_RES" {
-			threadwriter.write(thread, json.Read(e.msg.Load("C_READY_TO_START")))
-			continue
-		}
-		if jsonObj.Contains("other_uid", "AI_") {
-			threadwriter.write(thread, json.Read(e.msg.Load("C_FINISH_GAME")))
-			continue
-		}
-		if jsonObj.Load("_pcode") == "S_GAME_CREATED" && !jsonObj.Contains("other_uid", "AI_") {
-			threadwriter.write(thread, json.Read(e.msg.Load("C_LOADING_COMPLETE")))
-			continue
-		}
-
-		if jsonObj.Load("_pcode") == "S_GAME_START" {
-			if jsonObj.Load("hostUid") == thread.value[0] {
-				e.is_host = true
-				threadwriter.write(thread, json.Read(e.msg.Load("C_GAME_DATA")))
+	go func() {
+		for {
+			response := threadreader.read(thread)
+			res := make(map[string]interface{})
+			jsonObj := json.Json{}
+			bytesReader := bytes.NewReader(response)
+			if err := json.Decode(bytesReader, res); err != nil {
+				logger.Info("%v", err)
 			}
-			continue
-		}
-		if jsonObj.Load("_pcode") == "C_GAME_DATA" {
-			pcode = "C_GAME_DATA"
-			if jsonObj.Load("uid") == thread.value[0] {
-				e.ping_count--
+			jsonObj.SetJson(res)
+
+			if jsonObj.Load("_pcode") == "S_LOGIN_RES" {
+				chjson <- json.Read(e.msg.Load("C_READY_TO_START"))
+				continue
 			}
-			if jsonObj.Load("uid") == thread.value[0] && e.ping_count <= 0 {
-				if err := threadwriter.write(thread, json.Read(e.msg.Load("C_FINISH_GAME"))); err != nil {
+			if jsonObj.Contains("other_uid", "AI_") {
+				chjson <- json.Read(e.msg.Load("C_FINISH_GAME"))
+				continue
+			}
+			if jsonObj.Load("_pcode") == "S_GAME_CREATED" && !jsonObj.Contains("other_uid", "AI_") {
+				chjson <- json.Read(e.msg.Load("C_LOADING_COMPLETE"))
+				continue
+			}
+
+			if jsonObj.Load("_pcode") == "S_GAME_START" {
+				if jsonObj.Load("hostUid") == thread.value[0] {
+					e.is_host = true
+					chjson <- json.Read(e.msg.Load("C_GAME_DATA"))
+				}
+				continue
+			}
+			if jsonObj.Load("_pcode") == "C_GAME_DATA" && !e.is_finish_throw {
+				if jsonObj.Load("uid") == thread.value[0] {
+					e.ping_count--
+				}
+				if jsonObj.Load("uid") == thread.value[0] && e.ping_count <= 0 {
+					chjson <- json.Read(e.msg.Load("C_FINISH_GAME"))
+					e.is_finish_throw = true
+				}
+				if jsonObj.Load("uid") == thread.value[0] {
+					continue
+				}
+				chjson <- json.Read(e.msg.Load("C_GAME_DATA"))
+				continue
+			}
+
+			if jsonObj.Load("_pcode") == "S_GAME_RESULT" {
+				chjson <- json.Read(e.msg.Load("C_BACK_TO_LOBBY"))
+				return
+			}
+
+			if jsonObj.Load("_pcode") == "S_DISCONNECT_RES" && !e.is_finish_throw {
+				chjson <- json.Read(e.msg.Load("C_FINISH_GAME"))
+				e.is_finish_throw = true
+				continue
+			}
+
+			if jsonObj.Load("_pcode") == "S_MATCHING_FAIL" {
+				chjson <- json.Read(e.msg.Load("C_BACK_TO_LOBBY"))
+				thread.Schedule.Done()
+				return
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			select {
+			case msg := <-chjson:
+				if err := threadwriter.write(thread, msg); err != nil {
+					Usercount--
 					logger.Info("User count %d", Usercount)
 					thread.Schedule.Done()
 					return
 				}
-				e.is_finish_throw = true
+				if reflect.DeepEqual(msg, json.Read(e.msg.Load("C_BACK_TO_LOBBY"))) {
+					Usercount--
+					logger.Info("User count %d", Usercount)
+					thread.Schedule.Done()
+				}
 			}
-			if jsonObj.Load("uid") == thread.value[0] {
-				continue
-			}
-			if err := threadwriter.write(thread, json.Read(e.msg.Load(pcode))); err != nil {
-				logger.Info("User count %d", Usercount)
-				thread.Schedule.Done()
-				return
-			}
-			continue
 		}
+	}()
 
-		if jsonObj.Load("_pcode") == "S_GAME_RESULT" {
-			if err := threadwriter.write(thread, json.Read(e.msg.Load("C_BACK_TO_LOBBY"))); err != nil {
-				logger.Info("User count %d", Usercount)
-				thread.Schedule.Done()
-				return
-			}
-
-			Usercount--
-			logger.Info("User count %d", Usercount)
-			thread.Schedule.Done()
-			return
-		}
-
-		if jsonObj.Load("_pcode") == "S_DISCONNECT_RES" && !e.is_finish_throw {
-			threadwriter.write(thread, json.Read(e.msg.Load("C_FINISH_GAME")))
-			e.is_finish_throw = true
-			continue
-		}
-
-		if jsonObj.Load("_pcode") == "S_MATCHING_FAIL" {
-			if err := threadwriter.write(thread, json.Read(e.msg.Load("C_BACK_TO_LOBBY"))); err != nil {
-				logger.Info("User count %d", Usercount)
-				thread.Schedule.Done()
-				return
-			}
-			Usercount--
-			logger.Info("User count %d", Usercount)
-			thread.Schedule.Done()
-			return
-		}
-
-		if jsonObj.Load("_pcode") == "S_PING" {
-			logger.Info("User - %v ping_count: %v, isHost: %v", e.thread.value[0], e.ping_count, e.is_host)
-			continue
-		}
-	}
+	thread.Schedule.Wait()
 }
 
 func (e *context) TurnChange() {
