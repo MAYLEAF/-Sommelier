@@ -16,13 +16,6 @@ func (e *reader) read(thread *Handler) []byte {
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	/*
-		scanner := bufio.NewScanner(thread.conn)
-		for scanner.Scan() {
-			logger.Info("Thread Reader Scanner: %v",scanner.Bytes())
-		}
-	*/
-
 	msg := make(map[string]interface{})
 	bufReader := bufio.NewReader(thread.conn)
 	if err := json.Decode(bufReader, msg); err != nil {
