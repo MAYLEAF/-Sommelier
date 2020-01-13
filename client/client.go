@@ -4,11 +4,12 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/MAYLEAF/Sommelier/logger"
-	"github.com/MAYLEAF/Sommelier/thread"
 	"io/ioutil"
 	"os"
 	"sync"
+
+	"github.com/MAYLEAF/Sommelier/logger"
+	"github.com/MAYLEAF/Sommelier/thread"
 )
 
 type Client struct {
@@ -19,10 +20,12 @@ type Client struct {
 	Err        error
 }
 
+var Threadcount int
+
 func (e *Client) SetConnection() {
 	jsonFile, err := os.Open("connect.json")
 	if err != nil {
-		fmt.Println(err)
+		logger.Info("SetConnection err:%v", err)
 	}
 
 	defer jsonFile.Close()
@@ -34,16 +37,15 @@ func (e *Client) SetConnection() {
 	e.serverAddr = fmt.Sprintf("%v", result["serverAddress"])
 	e.protocol = fmt.Sprintf("%v", result["protocol"])
 	logger.Info("SetConnection with %v", result["serverAddress"])
-
 }
 
 func (e *Client) CreateThreads(values [][]string) {
 	logger.Info("Create Threads")
 	defer logger.Info("Create ThreadsEND")
 	wg := &sync.WaitGroup{}
-	thread.Usercount = 0
+	Threadcount = 0
 	for _, value := range values {
-		thread.Usercount++
+		Threadcount++
 		wg.Add(1)
 		go func(value []string) {
 			thread := thread.Handler{}
@@ -56,7 +58,7 @@ func (e *Client) CreateThreads(values [][]string) {
 	wg.Wait()
 }
 
-func (e *Client) MakeTest(actions map[string]interface{}) {
+func (e *Client) Test(actions map[string]interface{}) {
 	logger.Info("MakeTest", e.wg)
 	defer logger.Info("MakeTestEnd")
 
@@ -73,9 +75,12 @@ func (e *Client) test(actions map[string]interface{}, thread thread.Handler) {
 	logger.Info("Test A Thread;  Handler=%v", thread)
 	defer logger.Info("TestEnd A Thread; Handler=%v\n\n", thread)
 
-	go thread.RequestMaker(actions)
-	thread.Send = make(chan string, 10)
 	thread.Schedule.Add(1)
+	go thread.Play(actions)
+
 	thread.Schedule.Wait()
+	Threadcount--
+	logger.Info("usercount %d", Threadcount)
+
 	e.wg.Done()
 }
