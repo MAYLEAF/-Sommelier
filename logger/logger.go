@@ -25,13 +25,16 @@ func Logger() *logger {
 		}
 		instance.multiWriter = io.MultiWriter(instance.fpLog, os.Stdout)
 		log.SetOutput(instance.multiWriter)
+		log.SetFlags(log.Ldate)
+		log.SetFlags(log.Ltime)
+		log.SetFlags(log.Lmicroseconds)
 		log.SetPrefix("Logger: ")
 	})
 	return instance
 }
 
-func (e *logger) Close() {
-	e.fpLog.Close()
+func Close() {
+	instance.fpLog.Close()
 }
 
 func Info(format string, v ...interface{}) {
