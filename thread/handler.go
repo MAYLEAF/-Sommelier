@@ -8,34 +8,30 @@ import (
 
 type Handler struct {
 	conn     *net.TCPConn
+	id       string
 	value    []string
 	Schedule sync.WaitGroup
 	lock     sync.Mutex
-	Send     chan string
 	err      error
 }
 
-func (e *Handler) Create(serverAddr string, value []string) {
-	server, _ := net.ResolveTCPAddr("tcp", serverAddr)
-	e.conn, e.err = net.DialTCP("tcp", nil, server)
-	if err := e.conn.SetNoDelay(false); err != nil {
-		logger.Error("Fail to set no delay to Server err : %v", err)
+func (thread *Handler) Create(serverAddr string, value []string) {
+	server, err := net.ResolveTCPAddr("tcp", serverAddr)
+	if err != nil {
+		logger.Error("Fail to Handler Create Addr Resolve err : %v %v", err)
 	}
-	e.value = value
-	if e.err != nil {
-		logger.Error("Fail to connect to Server err : %v", e.err)
+	thread.conn, thread.err = net.DialTCP("tcp", nil, server)
+	thread.value = value
+	thread.id = value[0]
+	if thread.err != nil {
+		logger.Error("Fail to connect to Server err : %v %v %v", thread.err, server, serverAddr)
 	}
 }
 
-func (e *Handler) RequestMaker(actions map[string]interface{}) {
-	threadContext := context{}
+func (thread *Handler) Attack(actions map[string]interface{}) {
+	Context := context{}
 	Actions = actions
-	threadContext.Initialize(e)
-	threadContext.react(e)
-	e.conn.Close()
-}
-
-func (e *Handler) Write(message []byte) {
-	threadWriter := writer{}
-	threadWriter.write(e, message)
+	Context.Initialize(thread)
+	Context.react(thread)
+	thread.conn.Close()
 }
