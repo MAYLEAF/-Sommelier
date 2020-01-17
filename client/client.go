@@ -18,7 +18,7 @@ type Client struct {
 	Err         error
 }
 
-type ConnInfo struct {
+type connInfo struct {
 	RAddr string `json:"serverAddress"`
 	Proto string `json:"protocol"`
 }
@@ -27,17 +27,14 @@ var Threadcount = 0
 
 func New() *Client {
 	newClient := Client{}
-	newClient.rAddr, newClient.proto = connInfo()
+	newClient.rAddr, newClient.proto = ConnInfo()
 	return &newClient
 }
 
-func connInfo() (string, string) {
-	json := &ConnInfo{}
-	json = jsonLib.ReadJsonFile("connect.json", json).(*ConnInfo)
-	rAddr := json.RAddr
-	proto := json.Proto
-	logger.Info("Conn Info: %v", json)
-	return rAddr, proto
+func ConnInfo() (string, string) {
+	json := &connInfo{}
+	json = jsonLib.ReadJsonFile("connect.json", json).(*connInfo)
+	return json.RAddr, json.Proto
 }
 
 func (e *Client) CreateThreads(values [][]string) {
