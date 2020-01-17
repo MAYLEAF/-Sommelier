@@ -21,7 +21,7 @@ func (e *writer) write(thread *Handler, message []byte) error {
 	bufWriter := bufio.NewWriter(thread.conn)
 
 	if err := json.Decode(byteReader, msg); err != nil {
-		logger.Info("Thread Writer Decode error occur. Err: %v, Conn: %v", err, thread.value[0])
+		logger.Error("Thread Writer Decode error occur. Err: %v, Conn: %v", err, thread.value[0])
 		return err
 	}
 
@@ -30,11 +30,11 @@ func (e *writer) write(thread *Handler, message []byte) error {
 	defer logger.Info("Request Message:" + string(last_msg))
 
 	if _, err := bufWriter.Write(last_msg); err != nil {
-		logger.Info("Thread Writer Write error occur. Err: %v, Conn: %v", err, thread.value[0])
+		logger.Error("Thread Writer Write error occur. Err: %v, Conn: %v", err, thread.value[0])
 		return err
 	}
 	if err := bufWriter.Flush(); err != nil {
-		logger.Info("Thread Writer Flush error occur. Err: %v, Conn: %v", err, thread.value[0])
+		logger.Error("Thread Writer Flush error occur. Err: %v, Conn: %v", err, thread.value[0])
 		return err
 	}
 	return nil

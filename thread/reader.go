@@ -27,7 +27,7 @@ func (e *reader) read(thread *Handler) []byte {
 	})
 
 	if err := e.jsonDecoder.Decode(&msg); err != nil {
-		logger.Info("Thread Reader error occur Err: %v User:%v", err, thread.value[0])
+		logger.Error("Thread Reader error occur Err: %v User:%v", err, thread.value[0])
 	}
 	buf := jsonLib.Read(msg)
 
