@@ -5,8 +5,12 @@ package json
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/MAYLEAF/Sommelier/logger"
 	"io"
+	"io/ioutil"
+	"os"
+	"reflect"
 	"regexp"
 	"strings"
 )
@@ -42,6 +46,18 @@ func Read(v interface{}) []byte {
 	return msg
 }
 
+func ReadJsonFile(file_name string, v interface{}) interface{} {
+	if File, err := os.Open(file_name); err != nil {
+		fmt.Println(err)
+	}
+	defer File.Close()
+	byteValue, _ := ioutil.ReadAll(File)
+	mType := reflect.TypeOf(v).Elem()
+	newV := reflect.New(mType).Interface()
+	json.Unmarshal([]byte(byteValue), newV)
+	return newV
+}
+
 func (e *Json) Json() map[string]interface{} {
 	return e.json
 }
@@ -72,15 +88,14 @@ func (e *Json) Contains(key string, value string) bool {
 	return true
 }
 func (e *Json) Select(key string) *Json {
-	msg, err := json.Marshal(e.json[key])
-	if err != nil {
+	var msg []byte
+	var err error
+	var newJson = Json{}
+	if msg, err = json.Marshal(e.json[key]); err != nil {
 		logger.Info("Fail to read json err: %v \n", err)
 	}
 	dec := json.NewDecoder(strings.NewReader(string(msg)))
-	newJson := Json{}
-	err = dec.Decode(&newJson.json)
-
-	if err != nil {
+	if err = dec.Decode(&newJson.json); err != nil {
 		logger.Info("Json Select Error: %v", err)
 	}
 	return &newJson
