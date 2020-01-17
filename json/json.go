@@ -5,7 +5,6 @@ package json
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/MAYLEAF/Sommelier/logger"
 	"io"
 	"io/ioutil"
@@ -47,10 +46,13 @@ func Read(v interface{}) []byte {
 }
 
 func ReadJsonFile(file_name string, v interface{}) interface{} {
-	if File, err := os.Open(file_name); err != nil {
-		fmt.Println(err)
+	var File *os.File
+	var err error
+	if File, err = os.Open(file_name); err != nil {
+		panic(err)
 	}
 	defer File.Close()
+
 	byteValue, _ := ioutil.ReadAll(File)
 	mType := reflect.TypeOf(v).Elem()
 	newV := reflect.New(mType).Interface()
