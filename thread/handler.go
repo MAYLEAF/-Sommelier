@@ -7,25 +7,22 @@ import (
 )
 
 type Handler struct {
-	conn     *net.TCPConn
+	conn     net.Conn
 	id       string
 	value    []string
 	Schedule sync.WaitGroup
 	lock     sync.Mutex
-	err      error
 }
 
-func (thread *Handler) Create(serverAddr string, value []string) {
-	server, err := net.ResolveTCPAddr("tcp", serverAddr)
-	if err != nil {
-		logger.Error("Fail to Handler Create Addr Resolve err : %v %v", err)
+func New(rAddr string, value []string) *Handler {
+	var err error
+	newThread := Handler{}
+	if newThread.conn, err = net.Dial("tcp", rAddr); err != nil {
+		logger.Error("Fail to connect to Server err : %v", err)
 	}
-	thread.conn, thread.err = net.DialTCP("tcp", nil, server)
-	thread.value = value
-	thread.id = value[0]
-	if thread.err != nil {
-		logger.Error("Fail to connect to Server err : %v %v %v", thread.err, server, serverAddr)
-	}
+	newThread.value = value
+	newThread.id = value[0]
+	return &newThread
 }
 
 func (thread *Handler) Attack(actions map[string]interface{}) {

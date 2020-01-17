@@ -46,10 +46,9 @@ func (e *Client) CreateThreads(values [][]string) {
 		Threadcount++
 		wg.Add(1)
 		go func(value []string) {
-			thread := thread.Handler{}
-			thread.Create(e.rAddr, value)
-			e.threads = append(e.threads, thread)
-			logger.Info("Logger: Create thread:", thread)
+			newThread := thread.New(e.rAddr, value)
+			e.threads = append(e.threads, *newThread)
+			logger.Info("Logger: Create thread: %v", newThread)
 			wg.Done()
 		}(value)
 	}
