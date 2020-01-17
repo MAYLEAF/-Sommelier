@@ -15,7 +15,7 @@ type context struct {
 }
 
 var Actions map[string]interface{}
-var Usercount int
+var GameCount = 0
 
 func (e *context) Initialize(thread *Handler) {
 	e.msg = json.Json{}
@@ -59,6 +59,7 @@ func (e *context) react(user *Handler) {
 			if jsonObj.Load("_pcode") == "S_GAME_START" {
 				if jsonObj.Load("hostUid") == user.value[0] {
 					e.is_host = true
+					GameCount++
 					chjson <- json.Read(e.msg.Load("C_GAME_DATA"))
 				}
 				continue
