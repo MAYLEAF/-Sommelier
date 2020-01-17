@@ -11,9 +11,9 @@ import (
 
 type Client struct {
 	threads     []thread.Handler
-	ThreadCount int
+	threadCount int
 	rAddr       string
-	wg          sync.WaitGroup
+	waitGroup   sync.WaitGroup
 	proto       string
 	Err         error
 }
@@ -37,35 +37,29 @@ func ConnInfo() (string, string) {
 	return json.RAddr, json.Proto
 }
 
-func (e *Client) CreateThreads(values [][]string) {
+func (Test *Client) CreateThreads(values [][]string) {
 	logger.Info("Create Threads")
-	defer logger.Info("Create ThreadsEND")
-
-	wg := &sync.WaitGroup{}
 	for _, value := range values {
 		Threadcount++
-		wg.Add(1)
+		Test.waitGroup.Add(1)
 		go func(value []string) {
-			newThread := thread.New(e.rAddr, value)
-			e.threads = append(e.threads, *newThread)
-			logger.Info("Logger: Create thread: %v", newThread)
-			wg.Done()
+			newThread := thread.New(Test.rAddr, value)
+			Test.threads = append(Test.threads, *newThread)
+			Test.waitGroup.Done()
 		}(value)
 	}
-	wg.Wait()
+	Test.waitGroup.Wait()
 }
 
-func (e *Client) Test(actions map[string]interface{}) {
-	logger.Info("MakeTest", e.wg)
-	defer logger.Info("MakeTestEnd")
+func (Test *Client) Test(actions map[string]interface{}) {
+	logger.Info("MakeTest", nil)
 
-	e.wg.Wait()
-	for _, thread := range e.threads {
-		e.wg.Add(1)
-		go e.test(actions, thread)
+	for _, thread := range Test.threads {
+		Test.waitGroup.Add(1)
+		go Test.test(actions, thread)
 	}
 
-	e.wg.Wait()
+	Test.waitGroup.Wait()
 }
 
 func (e *Client) test(actions map[string]interface{}, thread thread.Handler) {
@@ -79,5 +73,5 @@ func (e *Client) test(actions map[string]interface{}, thread thread.Handler) {
 	Threadcount--
 	logger.Info("usercount %d", Threadcount)
 
-	e.wg.Done()
+	e.waitGroup.Done()
 }

@@ -16,17 +16,17 @@ type reader struct {
 	once        sync.Once
 }
 
-func (e *reader) read(thread *Handler) []byte {
-	e.lock.Lock()
-	defer e.lock.Unlock()
+func (Reader *reader) read(thread *Handler) []byte {
+	Reader.lock.Lock()
+	defer Reader.lock.Unlock()
 
 	msg := make(map[string]interface{})
-	e.once.Do(func() {
-		e.bufReader = bufio.NewReader(thread.conn)
-		e.jsonDecoder = json.NewDecoder(e.bufReader)
+	Reader.once.Do(func() {
+		Reader.bufReader = bufio.NewReader(thread.conn)
+		Reader.jsonDecoder = json.NewDecoder(Reader.bufReader)
 	})
 
-	if err := e.jsonDecoder.Decode(&msg); err != nil {
+	if err := Reader.jsonDecoder.Decode(&msg); err != nil {
 		logger.Error("Thread Reader error occur Err: %v User:%v", err, thread.value[0])
 	}
 	buf := jsonLib.Read(msg)
