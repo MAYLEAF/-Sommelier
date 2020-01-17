@@ -2,54 +2,55 @@
 package client
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"os"
 	"sync"
 
+	jsonLib "github.com/MAYLEAF/Sommelier/json"
 	"github.com/MAYLEAF/Sommelier/logger"
 	"github.com/MAYLEAF/Sommelier/thread"
 )
 
 type Client struct {
-	threads    []thread.Handler
-	serverAddr string
-	wg         sync.WaitGroup
-	protocol   string
-	Err        error
+	threads     []thread.Handler
+	ThreadCount int
+	rAddr       string
+	wg          sync.WaitGroup
+	proto       string
+	Err         error
 }
 
-var Threadcount int
+type ConnInfo struct {
+	RAddr string `json:"serverAddress"`
+	Proto string `json:"protocol"`
+}
 
-func (e *Client) SetConnection() {
-	jsonFile, err := os.Open("connect.json")
-	if err != nil {
-		logger.Info("SetConnection err:%v", err)
-	}
+var Threadcount = 0
 
-	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+func New() *Client {
+	newClient := Client{}
+	newClient.rAddr, newClient.proto = connInfo()
+	return &newClient
+}
 
-	var result map[string]interface{}
-	json.Unmarshal([]byte(byteValue), &result)
-
-	e.serverAddr = fmt.Sprintf("%v", result["serverAddress"])
-	e.protocol = fmt.Sprintf("%v", result["protocol"])
-	logger.Info("SetConnection with %v", result["serverAddress"])
+func connInfo() (string, string) {
+	json := &ConnInfo{}
+	json = jsonLib.ReadJsonFile("connect.json", json).(*ConnInfo)
+	rAddr := json.RAddr
+	proto := json.Proto
+	logger.Info("Conn Info: %v", json)
+	return rAddr, proto
 }
 
 func (e *Client) CreateThreads(values [][]string) {
 	logger.Info("Create Threads")
 	defer logger.Info("Create ThreadsEND")
+
 	wg := &sync.WaitGroup{}
-	Threadcount = 0
 	for _, value := range values {
 		Threadcount++
 		wg.Add(1)
 		go func(value []string) {
 			thread := thread.Handler{}
-			thread.Create(e.serverAddr, value)
+			thread.Create(e.rAddr, value)
 			e.threads = append(e.threads, thread)
 			logger.Info("Logger: Create thread:", thread)
 			wg.Done()
@@ -76,7 +77,7 @@ func (e *Client) test(actions map[string]interface{}, thread thread.Handler) {
 	defer logger.Info("TestEnd A Thread; Handler=%v\n\n", thread)
 
 	thread.Schedule.Add(1)
-	go thread.Play(actions)
+	go thread.Attack(actions)
 
 	thread.Schedule.Wait()
 	Threadcount--
