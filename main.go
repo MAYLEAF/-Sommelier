@@ -26,8 +26,7 @@ func main() {
 	actions := readJson(*request)
 	threadValue := readCsv(*value)
 
-	TestClient := client.Client{}
-	TestClient.SetConnection()
+	TestClient := client.New()
 	TestClient.CreateThreads(threadValue)
 
 	TestClient.Test(actions)
