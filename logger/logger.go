@@ -41,7 +41,7 @@ func Logger() *logger {
 	return instance
 }
 
-func Close() {
+func (*logger) Close() {
 	instance.InfoLog.Close()
 	instance.ErrorLog.Close()
 }
