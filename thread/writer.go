@@ -25,7 +25,7 @@ func (e *writer) write(thread *Handler, message []byte) error {
 		return err
 	}
 
-	msg["uid"] = thread.value[0]
+	msg["uid"] = thread.id
 	last_msg := json.Read(msg)
 	defer logger.Info("Request Message:" + string(last_msg))
 
