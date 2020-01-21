@@ -51,23 +51,22 @@ func (Test *Client) CreateThreads(values [][]string) {
 	Test.waitGroup.Wait()
 }
 
-func (Test *Client) Test(actions map[string]interface{}) {
+func (Test *Client) Test() {
 	logger.Info("MakeTest", nil)
 
 	for _, thread := range Test.threads {
 		Test.waitGroup.Add(1)
-		go Test.test(actions, thread)
+		go Test.test(thread)
 	}
 
 	Test.waitGroup.Wait()
 }
 
-func (e *Client) test(actions map[string]interface{}, thread thread.Handler) {
+func (e *Client) test(thread thread.Handler) {
 	logger.Info("Test A Thread;  Handler=%v", thread)
-	defer logger.Info("TestEnd A Thread; Handler=%v\n\n", thread)
 
 	thread.Schedule.Add(1)
-	go thread.Attack(actions)
+	go thread.Attack()
 
 	thread.Schedule.Wait()
 	Threadcount--

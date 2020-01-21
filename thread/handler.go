@@ -17,6 +17,7 @@ type Handler struct {
 func New(rAddr string, value []string) *Handler {
 	var err error
 	newThread := Handler{}
+	logger.Info("New Thread %v", value[0])
 	if newThread.conn, err = net.Dial("tcp", rAddr); err != nil {
 		logger.Error("Fail to connect to Server err : %v", err)
 	}
@@ -25,10 +26,9 @@ func New(rAddr string, value []string) *Handler {
 	return &newThread
 }
 
-func (thread *Handler) Attack(actions map[string]interface{}) {
-	Context := context{}
-	Actions = actions
-	Context.Initialize(thread)
-	Context.react(thread)
+func (thread *Handler) Attack() {
+	ctx := context{}
+	ctx.Initialize(thread)
+	ctx.react(thread)
 	thread.conn.Close()
 }

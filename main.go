@@ -10,27 +10,23 @@ import (
 	"os"
 
 	"github.com/MAYLEAF/Sommelier/client"
-	Sommelier "github.com/MAYLEAF/Sommelier/lib"
 	"github.com/MAYLEAF/Sommelier/logger"
+	"github.com/MAYLEAF/Sommelier/thread"
 )
 
+var request = flag.String("request", "request.json", "<file_name>.json")
+var value = flag.String("value", "value.csv", "<file_name>.csv")
+
 func main() {
-	request := flag.String("request", "request.json", "<file_name>.json")
-	value := flag.String("value", "value.csv", "<file_name>.csv")
 	flag.Parse()
-
-	logger.Logger()
-	defer logger.Close()
-	Sommelier.NewRedis()
-
-	actions := readJson(*request)
-	threadValue := readCsv(*value)
+	thread.Actions = readJson(*request)
+	threadList := readCsv(*value)
+	defer logger.Logger().Close()
 
 	TestClient := client.New()
-	TestClient.CreateThreads(threadValue)
+	TestClient.CreateThreads(threadList)
 
-	TestClient.Test(actions)
-
+	TestClient.Test()
 }
 
 func readJson(file_name string) map[string]interface{} {
