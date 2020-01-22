@@ -20,9 +20,11 @@ var GameCount = 0
 
 func (ctx *context) Initialize(thread *Handler) {
 	ctx.actions = Actions
-	ctx.actions["uid"] = thread.id
+	for key, val := range ctx.actions {
+		ctx.actions[key] = json.Modify(val, "uid", thread.id)
+	}
 	ctx.msg = json.Json{}
-	ctx.msg.SetJson(Actions)
+	ctx.msg.SetJson(ctx.actions)
 	ctx.ping_count = 100
 	ctx.is_finish_throw = false
 }
