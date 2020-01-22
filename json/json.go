@@ -36,6 +36,20 @@ func Encode(w io.Writer, v interface{}) error {
 	return nil
 }
 
+func Modify(node interface{}, k string, v interface{}) interface{} {
+	js := make(map[string]interface{})
+	var err error
+	var byteJson []byte
+	if byteJson, err = json.Marshal(node); err != nil {
+		panic(err)
+	}
+	if json.Unmarshal(byteJson, &js); err != nil {
+		panic(err)
+	}
+	js[k] = v
+	return js
+}
+
 func Read(v interface{}) []byte {
 	msg, err := json.Marshal(v)
 	if err != nil {
