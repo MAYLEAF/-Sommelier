@@ -9,7 +9,7 @@ You need go installed and GOBIN in your PATH.
 
 $ go get -u github.com/MAYLEAF/Sommelier
 
-== Usage
+## Usage
 Usage: Sommelier [global flags]
 global flags:
  -request string ex: request.json
