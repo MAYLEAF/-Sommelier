@@ -9,7 +9,6 @@ import (
 
 type context struct {
 	is_finish_throw bool
-	is_host         bool
 	ping_count      int
 	actions         map[string]interface{}
 
@@ -26,7 +25,6 @@ func (ctx *context) Initialize(thread *Handler) {
 	ctx.msg.SetJson(Actions)
 	ctx.ping_count = 100
 	ctx.is_finish_throw = false
-	ctx.is_host = false
 }
 
 func (ctx *context) react(user *Handler) {
@@ -62,7 +60,6 @@ func (ctx *context) react(user *Handler) {
 
 			if jsonObj.Load("_pcode") == "S_GAME_START" {
 				if jsonObj.Load("hostUid") == user.value[0] {
-					ctx.is_host = true
 					GameCount++
 					chjson <- json.Read(ctx.msg.Load("C_GAME_DATA"))
 				}
